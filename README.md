@@ -55,7 +55,7 @@ PATCH /burgers/{burger_id}.json
 	"google_id": "ChIJO46LpyEFdkgR5-0jDOGhiKw",
 	"google_url": "https://maps.google.com/?cid=12432364759299648999",
 	"is_chain": false,
-	"is_validated": false, // Approve: true, Reject: false
+	"is_validated": false,
 	"likes_count": 0,
 	"location": {
 		"address": "205 Victoria St, Westminster, London SW1E 5NE, UK",
@@ -66,10 +66,10 @@ PATCH /burgers/{burger_id}.json
 		"geohash": "gcpuuwwsvk3"
 	},
 	"price_range": 0,
-	"was_reviewed": false // Set to true
+	"was_reviewed": false
 }
 ```
->NOTE: You only need to set `was_reviewed` && `is_validated`
+>NOTE: You only need to set `was_reviewed: true` && `is_validated: true || false`
 
 #### 2. Images Validation
 ```
