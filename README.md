@@ -7,15 +7,24 @@
 
 ## Dashboard Page
 
-### Design
+### Design 
+_(Feel free to use any design you want, this is just wireframes.)_
 
-![Login](assets/login.jpg)
+#### Auth 
 
-![Place](assets/place.jpg)
+![Login](assets/login.png)
 
-![Login](assets/images.jpg)
+#### Place Validation 
 
-![Place](assets/thumbnail.jpg)
+![Place](assets/place.png)
+
+#### Image Validation 
+
+![Login](assets/images.png)
+
+#### Setting Thumb nail 
+
+![Place](assets/thumbnail.png)
 
 ### API
 
@@ -35,6 +44,8 @@ Parameters
 ```
 PATCH /burgers/{burger_id}.json
 ```
+
+**EXAMPLE**
 
 ```json 
 {
@@ -58,10 +69,50 @@ PATCH /burgers/{burger_id}.json
 	"was_reviewed": false # Set to true
 }
 ```
+>NOTE: You only need to set `was_reviewed` && `is_validated`
 
 #### 2. Images Validation
 ```
 GET /images_container/{burger_id}.json
+```
+
+##### Approve 
+
+`asynchronous calls`
+
+###### CALL 1
+```
+PATCH /images_approved/{burger_id}.json
+```
+
+```json
+{
+  "{image_id}" : 1
+}
+```
+###### CALL 2
+```
+DELETE /images_container/{burger_id}/{image_id}.json"
+```
+
+##### Reject
+
+`asynchronous calls`
+
+###### CALL 1
+```
+PATCH /images_rejected/{burger_id}.json
+```
+
+```json
+{
+  "{image_id}" : 1
+}
+```
+
+###### CALL 2
+```
+DELETE /images_container/{burger_id}/{image_id}.json"
 ```
 
 #### 3. Thumbnail Images
@@ -69,8 +120,67 @@ GET /images_container/{burger_id}.json
 ```
 GET /images_approved.json
 ```
+**IMPORTANT: Do not load all images at once. Only when user scrolls**
+
+_Example of a burger object with a `highlight_image`_
+
+```json
+{
+"added_by": "bejDrFK9FsVbhPWLRxPvMHrJEav2",
+"burger_name": "BBB",
+"burger_search_name": "bbb",
+"google_id": "ChIJN2fwpoJLHRURxb3duY9M3sQ",
+"google_url": "https://maps.google.com/?cid=14185860056445992389",
+"highlight_image": {
+	"added_by": "bejDrFK9FsVbhPWLRxPvMHrJEav2",
+	"created_at": "2019-03-26T15:51:55.726Z",
+	"google_photo_reference": "CmRaAAAAHYkunPU-469ivVU1iuRue3B6UEmF0LFHlmeAriVR9-aZk-aeWkpObgjzPwjP--p2e-8JdF3QhDOQDi67T34RnCQJ6oPEeBLxC5HoWy2K2oAmQ1FjxVvTzM08sKYHUoP_EhCdtxqyIgIE44kVqKx0N8A0GhT8SCvOB8gSbg9A2tofXJiqVI4XfQ",
+	"height": 1080,
+	"html_attributions": [
+		"<a href=\"https://maps.google.com/maps/contrib/100918061067320897819/photos\">yaron brener</a>"
+	],
+	"is_validated": false,
+	"name": "",
+	"owner_id": "-LaugqGgTDBTk1x3GZU-",
+	"url": "https://firebasestorage.googleapis.com/v0/b/burgers-best-stage.appspot.com/o/burger_images%2FFCDF45CF-A819-4644-98DB-567099A466D7.jpg?alt=media&token=90e316f9-fb64-4824-93e7-bb4aff82a9a9",
+	"width": 1620
+},
+"is_chain": false,
+"is_validated": true,
+"likes_count": 6,
+"location": {
+	"address": "HaArba'a St 12, Tel Aviv-Yafo, Israel",
+	"coordinates": {
+		"lat": 32.0702821,
+		"long": 34.78407709999999
+	},
+	"geohash": "sv8wrw0yztz"
+},
+"price_range": 2,
+"was_reviewed": true
+}
+```
+
+```
+PATCH /burgers/{burger_id}.json
+```
+
+```
+{
+	... burger object
+	"highlight_image" : # Set the image object in the current burger object.
+}
+```
 
 ### Credentials
+
+#### Login creds
+```
+username: admin-dev@bestburgers.app
+password: cd'@]P9Hb6buQ*!J
+```
+
+#### API Creds
 
 ```
 var firebaseConfig = {
