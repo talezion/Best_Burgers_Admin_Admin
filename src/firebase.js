@@ -9,5 +9,21 @@ const firebaseConfig = {
     messagingSenderId: "1089706900218",
     appId: "1:1089706900218:web:eeda4bc080b7ea5f"
 };
-firebase.initializeApp(firebaseConfig);
-export default firebase;
+let app = firebase.initializeApp(firebaseConfig);
+
+const db = app.database();
+const burgersRef = db.ref('burgers');
+const images_container = db.ref('images_container');
+const images_approved = db.ref('images_approved');
+const images_rejected = db.ref('images_rejected');
+const images = db.ref('images');
+
+export {
+    firebase,
+    db,
+    burgersRef,
+    images_container,
+    images_approved,
+    images_rejected,
+    images
+};
