@@ -17,6 +17,7 @@ const images_container = db.ref('images_container');
 const images_approved = db.ref('images_approved');
 const images_rejected = db.ref('images_rejected');
 const images = db.ref('images');
+const users = db.ref('users');
 
 export {
     firebase,
@@ -25,5 +26,6 @@ export {
     images_container,
     images_approved,
     images_rejected,
-    images
+    images,
+    users,
 };

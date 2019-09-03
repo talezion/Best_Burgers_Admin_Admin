@@ -26,9 +26,9 @@
 <script>
 import firebase from "firebase";
 import LoadingAnimation from "@/components/LoadingAnimation";
-
+import {users} from "@/firebase";
 export default {
-  name: "login",
+  name: "Login",
   components: {
     LoadingAnimation,
   },
@@ -46,11 +46,21 @@ export default {
       this.showAnimation = true;
       firebase.auth().signInWithEmailAndPassword(this.email, this.password).then(
         (user) => {
+          let users1 = users.orderByChild('role').equalTo('admin').on("value", (snapshot) => {
+            if(snapshot.val()){
+              this.$router.push('home');
+            }
+            else{
+              firebase.auth().signOut().then(() => {
+                this.$router.replace('login');
+              })
+            }
+          });
           this.showAnimation = false;
-          this.$router.push('home');
         },
         (err) => {
           alert(err.message);
+          this.showAnimation = false;
         }
       )
     }
