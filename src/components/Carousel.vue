@@ -33,6 +33,13 @@
         >
           Thumbnail
         </p>
+        <p
+          v-else-if="
+            burger_place.highlight_image
+          "
+        >
+          No Thumbnail
+        </p>
       </b-carousel-slide> </b-carousel
     ><br />
     <button class="btn btn-primary btn-block" @click="setClicked">Set</button>
