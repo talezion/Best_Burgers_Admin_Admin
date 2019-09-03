@@ -1,5 +1,7 @@
 <template>
   <div v-if="type == 'thumbnail' && images.length > 0">
+    <LoadingAnimation v-if="showProcessing" />
+    <Alert v-if="showAlert" @countDownEnded="hideAlert" :type="alertType">{{alertMessage}}</Alert>
     <b-carousel
       id="carousel-1"
       v-model="slide"
@@ -24,7 +26,6 @@
           :src="getImageUrl(index)"
           alt="image slot"
         />
-
         <p
           v-if="
             burger_place.highlight_image &&
@@ -35,13 +36,14 @@
         </p>
         <p
           v-else-if="
-            burger_place.highlight_image
+            !burger_place.highlight_image
           "
         >
           No Thumbnail
         </p>
-      </b-carousel-slide> </b-carousel
-    ><br />
+      </b-carousel-slide>
+        
+      </b-carousel><br />
     <button class="btn btn-primary btn-block" @click="setClicked">Set</button>
   </div>
   <div v-else-if="type == 'images' && images.length > 0">
@@ -90,9 +92,15 @@ import {
   burgersRef,
   images_rejected
 } from "../firebase";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import Alert from "@/components/Alert";
+
 export default {
   name: "carousel",
   props: ["image_key", "type"],
+  components:{
+    LoadingAnimation, Alert,
+  },
   data: function() {
     return {
       slide: 0,
@@ -104,7 +112,11 @@ export default {
       container_images: [],
       approved_images_container_keys: [],
       rejected_images: [],
-      burger_place: {}
+      burger_place: {},
+      showProcessing: false,
+      showAlert: false,
+      alertMessage: "",
+      alertType: "",
     };
   },
   firebase: {
@@ -114,6 +126,10 @@ export default {
     container_images: images_container.orderByKey()
   },
   methods: {
+    hideAlert: function(){
+      this.showAlert = false;
+      this.alertMessage = "";
+    },
     onSlideStart(slide) {
       this.sliding = true;
     },
@@ -128,7 +144,7 @@ export default {
           break;
         }
       }
-      if (this.type == "images") {
+      /*if (this.type == "images") {
         console.log(
           key,
           imageIndex,
@@ -136,7 +152,7 @@ export default {
           this.images[imageIndex].url,
           this.burger_place
         );
-      }
+      }*/
       //this.current_images.push(this.images[imageIndex]);
       return this.images[imageIndex].url;
     },
@@ -185,10 +201,25 @@ export default {
       this.getAllData();
     },
     setClicked: function() {
+      this.showProcessing = true;
       let imageIndex = this.getSelectedImageIndex();
       burgersRef
         .child(this.image_key)
-        .update({ highlight_image: this.images[imageIndex] });
+        .update({ highlight_image: this.images[imageIndex] },
+        (error) => {
+          if (error) {
+            alert(err.message);
+            this.showProcessing = false;
+            this.alertMessage = "Something went wrong";
+            this.alertType = "danger";
+            this.showAlert = true;
+          } else {
+            this.showProcessing = false;
+            this.alertMessage = "Thumbnail Set successfully";
+            this.alertType = "primary";
+            this.showAlert = true;
+          }
+        });
     },
     checkIfApprovedExist: function() {
       let placeIndex = -1;
