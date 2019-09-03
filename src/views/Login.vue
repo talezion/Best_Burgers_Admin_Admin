@@ -46,15 +46,16 @@ export default {
       this.showAnimation = true;
       firebase.auth().signInWithEmailAndPassword(this.email, this.password).then(
         (user) => {
-          let users1 = users.orderByChild('role').equalTo('admin').on("value", (snapshot) => {
-            if(snapshot.val()){
-              this.$router.push('home');
-            }
-            else{
-              firebase.auth().signOut().then(() => {
-                this.$router.replace('login');
-              })
-            }
+          let users1 = users.orderByChild('email').equalTo(user.user.email).on("value", (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+              if(childSnapshot.val().role){
+                this.$router.push('home');  
+              }
+              else{
+                firebase.auth().signOut().then(() => {});
+                alert("You are not an Admin!");
+              }
+            });
           });
           this.showAnimation = false;
         },
