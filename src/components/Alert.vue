@@ -28,8 +28,6 @@ export default {
       }
     },
   },
-  mounted(){
-  }
 }
 </script>
 
