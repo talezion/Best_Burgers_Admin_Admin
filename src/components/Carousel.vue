@@ -47,6 +47,8 @@
     <button class="btn btn-primary btn-block" @click="setClicked">Set</button>
   </div>
   <div v-else-if="type == 'images' && images.length > 0">
+    <LoadingAnimation v-if="showProcessingImage" />
+    <Alert v-if="showAlertImage" @countDownEnded="hideAlert" :type="alertType">{{alertMessage}}</Alert>
     <b-carousel
       id="carousel-1"
       v-model="slide"
@@ -117,6 +119,8 @@ export default {
       showAlert: false,
       alertMessage: "",
       alertType: "",
+      showProcessingImage: false,
+      showAlertImage: false,
     };
   },
   firebase: {
@@ -128,6 +132,7 @@ export default {
   methods: {
     hideAlert: function(){
       this.showAlert = false;
+      this.showAlertImage = false;
       this.alertMessage = "";
     },
     onSlideStart(slide) {
@@ -157,68 +162,80 @@ export default {
       return this.images[imageIndex].url;
     },
     approveClicked: function() {
-      let imageIndex = this.getSelectedImageIndex();
-      if (this.checkIfApprovedExist() == -1) {
-        let image_key = {};
-        image_key[this.images[imageIndex][".key"]] = 1;
-        images_approved.child(this.image_key).set(image_key);
-      } else {
-        let approved_images_container = [];
-        this.approved_images_ids.forEach(element => {
-          if (element[".key"] == this.image_key) {
-            approved_images_container = element;
-          }
-        });
-        approved_images_container[this.images[imageIndex][".key"]] = 1;
-        images_approved.child(this.image_key).set(approved_images_container);
+      this.showProcessingImage = true;
+      if(this.approved_images_container_keys.length > 1){
+        let imageIndex = this.getSelectedImageIndex();
+        if (this.checkIfApprovedExist() == -1) {
+          let image_key = {};
+          image_key[this.images[imageIndex][".key"]] = 1;
+          images_approved.child(this.image_key).set(image_key, (error) => {
+            this.showAlertForImages(error);
+          });
+        } else {
+          let approved_images_container = [];
+          this.approved_images_ids.forEach(element => {
+            if (element[".key"] == this.image_key) {
+              approved_images_container = element;
+            }
+          });
+          approved_images_container[this.images[imageIndex][".key"]] = 1;
+          images_approved.child(this.image_key).set(approved_images_container, (error) => {
+            this.showAlertForImages(error);
+          });
+        }
+        images_container
+          .child(this.image_key)
+          .child(this.images[imageIndex][".key"])
+          .remove();
+        this.getAllData();
       }
-      images_container
-        .child(this.image_key)
-        .child(this.images[imageIndex][".key"])
-        .remove();
-      this.getAllData();
+      else{
+        let error = {};
+        error.message = "You can not set image until it is more than 1!";
+        this.showAlertForImages(error);
+      }
     },
     rejectClicked: function() {
-      let imageIndex = this.getSelectedImageIndex();
-      if (this.checkIfRejectedExist() == -1) {
-        let image_key = {};
-        image_key[this.images[imageIndex][".key"]] = 1;
-        images_rejected.child(this.image_key).set(image_key);
-      } else {
-        let rejected_images_container = [];
-        this.rejected_images.forEach(element => {
-          if (element[".key"] == this.image_key) {
-            rejected_images_container = element;
-          }
-        });
-        rejected_images_container[this.images[imageIndex][".key"]] = 1;
-        images_rejected.child(this.image_key).set(rejected_images_container);
+      this.showProcessingImage = true;
+      if(this.approved_images_container_keys.length > 1){
+        let imageIndex = this.getSelectedImageIndex();
+        if (this.checkIfRejectedExist() == -1) {
+          let image_key = {};
+          image_key[this.images[imageIndex][".key"]] = 1;
+          images_rejected.child(this.image_key).set(image_key, (error) => {
+            this.showAlertForImages(error, "Image rejected successfully");
+          });
+        } else {
+          let rejected_images_container = [];
+          this.rejected_images.forEach(element => {
+            if (element[".key"] == this.image_key) {
+              rejected_images_container = element;
+            }
+          });
+          rejected_images_container[this.images[imageIndex][".key"]] = 1;
+          images_rejected.child(this.image_key).set(rejected_images_container, (error) => {
+            this.showAlertForImages(error);
+          });
+        }
+        images_container
+          .child(this.image_key)
+          .child(this.images[imageIndex][".key"])
+          .remove();
+        this.getAllData();
       }
-      images_container
-        .child(this.image_key)
-        .child(this.images[imageIndex][".key"])
-        .remove();
-      this.getAllData();
+      else{
+        let error = {};
+        error.message = "You can not reject image until it is more than 1!";
+        this.showAlertForImages(error);
+      }
     },
     setClicked: function() {
       this.showProcessing = true;
       let imageIndex = this.getSelectedImageIndex();
       burgersRef
         .child(this.image_key)
-        .update({ highlight_image: this.images[imageIndex] },
-        (error) => {
-          if (error) {
-            alert(err.message);
-            this.showProcessing = false;
-            this.alertMessage = "Something went wrong";
-            this.alertType = "danger";
-            this.showAlert = true;
-          } else {
-            this.showProcessing = false;
-            this.alertMessage = "Thumbnail Set successfully";
-            this.alertType = "primary";
-            this.showAlert = true;
-          }
+        .update({ highlight_image: this.images[imageIndex] }, (error) => {
+          this.showAlertForThumbnail(error);
         });
     },
     checkIfApprovedExist: function() {
@@ -251,6 +268,35 @@ export default {
         }
       }
       return imageIndex;
+    },
+    showAlertForImages: function(error, message){
+      if(error){
+        this.showProcessingImage = false;
+        this.alertMessage = error.message;
+        this.alertType = "danger";
+        this.showAlertImage = true;
+      }
+      else{
+        this.showProcessingImage = false;
+        if(message){
+          this.alertMessage = message;
+        }
+        this.alertType = "primary";
+        this.showAlertImage = true;
+      }
+    },
+    showAlertForThumbnail: function(error){
+      if (error) {
+        this.showProcessing = false;
+        this.alertMessage = error.message;
+        this.alertType = "danger";
+        this.showAlert = true;
+      } else {
+        this.showProcessing = false;
+        this.alertMessage = "Thumbnail Set successfully";
+        this.alertType = "primary";
+        this.showAlert = true;
+      }
     },
     getAllData: function() {
       this.getBurgerPlace();
