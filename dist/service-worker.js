@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.63da4903a308c28fb3b387c3fdd63712.js"
+  "/precache-manifest.c4444c25db4a60ca5c2bb8df01a7d543.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "best-burger-admin-panel"});
