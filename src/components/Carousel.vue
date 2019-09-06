@@ -14,15 +14,14 @@
       @sliding-end="onSlideEnd"
     >
       <b-carousel-slide
-        img-height="200"
-        img-width="200"
+        class="image"
         v-for="(approved_image, index) in approved_images_container"
         :key="index"
       >
         <img
           v-if="approved_image"
           slot="img"
-          class="d-block img-fluid mx-auto wh"
+          class="img img-responsive full-width"
           :src="getImageUrl(index)"
           alt="image slot"
         />
@@ -61,15 +60,14 @@
       @sliding-end="onSlideEnd"
     >
       <b-carousel-slide
-        img-height="200"
-        img-width="200"
+        class="image"
         v-for="(approved_image, index) in approved_images_container"
         :key="index"
       >
         <img
           v-if="approved_image"
           slot="img"
-          class="d-block img-fluid mx-auto wh"
+          class="img img-responsive full-width"
           :src="getImageUrl(index)"
           alt="image slot"
         />
@@ -191,7 +189,7 @@ export default {
       }
       else{
         let error = {};
-        error.message = "You can not set image until it is more than 1!";
+        error.message = "You can not approve or disapprove!";
         this.showAlertForImages(error);
       }
     },
@@ -225,7 +223,7 @@ export default {
       }
       else{
         let error = {};
-        error.message = "You can not reject image until it is more than 1!";
+        error.message = "You can not approve or disapprove!";
         this.showAlertForImages(error);
       }
     },
@@ -338,8 +336,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wh {
-  height: 200px;
-  width: 100%;
+.image{
+    position:relative;
+    overflow:hidden;
+    padding-bottom:100%;
+}
+.image img{
+    position:absolute;
+}
+.img-responsive{
+  display: block;
+  max-width: 100%;
+  height: 100%;
 }
 </style>

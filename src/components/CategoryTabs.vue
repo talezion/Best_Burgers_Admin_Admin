@@ -24,8 +24,10 @@
       <b-tab title="Burger Place Validation">
         <div class="row">
           <div class="col-md-3 text-center mb-4" v-for="(place, index) in places" :key="index">
-            <img :src="place.highlight_image.url" v-if="place.highlight_image" class="d-block img-fluid mx-auto wh" />
-            <img src="favicon.png" v-else class="d-block img-fluid mx-auto wh" />
+            <div class="image">
+            <img :src="place.highlight_image.url" v-if="place.highlight_image" class="img img-responsive full-width" />
+            <img src="favicon.png" v-else class="img img-responsive full-width" />
+            </div>
             <p>{{place.burger_name}}</p>
             <div class="d-flex">
               <button class="btn btn-primary flex-fill" @click="approveClicked(place)">Approve</button>
@@ -133,9 +135,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wh {
-  height: 200px;
-  width: 100%;
-  background-color: "#ababab";
+.image{
+    position:relative;
+    overflow:hidden;
+    padding-bottom:100%;
+}
+.image img{
+    position:absolute;
+}
+.img-responsive{
+  display: block;
+  max-width: 100%;
+  height: 100%;
 }
 </style>
