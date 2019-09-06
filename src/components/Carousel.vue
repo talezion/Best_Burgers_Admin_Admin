@@ -189,7 +189,7 @@ export default {
       }
       else{
         let error = {};
-        error.message = "You can not approve or disapprove!";
+        error.message = "You can not Approve or Reject image!";
         this.showAlertForImages(error);
       }
     },
@@ -223,7 +223,7 @@ export default {
       }
       else{
         let error = {};
-        error.message = "You can not approve or disapprove!";
+        error.message = "You can not Approve or Reject image!";
         this.showAlertForImages(error);
       }
     },
