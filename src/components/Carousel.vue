@@ -342,7 +342,8 @@ export default {
     padding-bottom:100%;
 }
 .image img{
-    position:absolute;
+    position: absolute;
+    width: 100%;
 }
 .img-responsive{
   display: block;

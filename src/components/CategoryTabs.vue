@@ -129,8 +129,6 @@ export default {
       }
     }
   },
-  mounted(){
-  }
 }
 </script>
 
@@ -142,6 +140,7 @@ export default {
 }
 .image img{
     position:absolute;
+    width: 100%;
 }
 .img-responsive{
   display: block;
