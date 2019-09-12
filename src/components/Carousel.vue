@@ -1,7 +1,9 @@
 <template>
   <div v-if="type == 'thumbnail' && images.length > 0">
     <LoadingAnimation v-if="showProcessing" />
-    <Alert v-if="showAlert" @countDownEnded="hideAlert" :type="alertType">{{alertMessage}}</Alert>
+    <Alert v-if="showAlert" @countDownEnded="hideAlert" :type="alertType">{{
+      alertMessage
+    }}</Alert>
     <b-carousel
       id="carousel-1"
       v-model="slide"
@@ -33,21 +35,21 @@
         >
           Thumbnail
         </p>
-        <p
-          v-else-if="
-            !burger_place.highlight_image
-          "
-        >
+        <p v-else-if="!burger_place.highlight_image">
           No Thumbnail
         </p>
-      </b-carousel-slide>
-        
-      </b-carousel><br />
+      </b-carousel-slide> </b-carousel
+    ><br />
     <button class="btn btn-primary btn-block" @click="setClicked">Set</button>
   </div>
   <div v-else-if="type == 'images' && images.length > 0">
     <LoadingAnimation v-if="showProcessingImage" />
-    <Alert v-if="showAlertImage" @countDownEnded="hideAlert" :type="alertType">{{alertMessage}}</Alert>
+    <Alert
+      v-if="showAlertImage"
+      @countDownEnded="hideAlert"
+      :type="alertType"
+      >{{ alertMessage }}</Alert
+    >
     <b-carousel
       id="carousel-1"
       v-model="slide"
@@ -98,8 +100,9 @@ import Alert from "@/components/Alert";
 export default {
   name: "carousel",
   props: ["image_key", "type"],
-  components:{
-    LoadingAnimation, Alert,
+  components: {
+    LoadingAnimation,
+    Alert
   },
   data: function() {
     return {
@@ -118,7 +121,7 @@ export default {
       alertMessage: "",
       alertType: "",
       showProcessingImage: false,
-      showAlertImage: false,
+      showAlertImage: false
     };
   },
   firebase: {
@@ -128,7 +131,7 @@ export default {
     container_images: images_container.orderByKey()
   },
   methods: {
-    hideAlert: function(){
+    hideAlert: function() {
       this.showAlert = false;
       this.showAlertImage = false;
       this.alertMessage = "";
@@ -161,12 +164,12 @@ export default {
     },
     approveClicked: function() {
       this.showProcessingImage = true;
-      if(this.approved_images_container_keys.length > 1){
+      if (this.approved_images_container_keys.length > 1) {
         let imageIndex = this.getSelectedImageIndex();
         if (this.checkIfApprovedExist() == -1) {
           let image_key = {};
           image_key[this.images[imageIndex][".key"]] = 1;
-          images_approved.child(this.image_key).set(image_key, (error) => {
+          images_approved.child(this.image_key).set(image_key, error => {
             this.showAlertForImages(error);
           });
         } else {
@@ -177,17 +180,18 @@ export default {
             }
           });
           approved_images_container[this.images[imageIndex][".key"]] = 1;
-          images_approved.child(this.image_key).set(approved_images_container, (error) => {
-            this.showAlertForImages(error);
-          });
+          images_approved
+            .child(this.image_key)
+            .set(approved_images_container, error => {
+              this.showAlertForImages(error);
+            });
         }
         images_container
           .child(this.image_key)
           .child(this.images[imageIndex][".key"])
           .remove();
         this.getAllData();
-      }
-      else{
+      } else {
         let error = {};
         error.message = "You can not Approve or Reject image!";
         this.showAlertForImages(error);
@@ -195,12 +199,12 @@ export default {
     },
     rejectClicked: function() {
       this.showProcessingImage = true;
-      if(this.approved_images_container_keys.length > 1){
+      if (this.approved_images_container_keys.length > 1) {
         let imageIndex = this.getSelectedImageIndex();
         if (this.checkIfRejectedExist() == -1) {
           let image_key = {};
           image_key[this.images[imageIndex][".key"]] = 1;
-          images_rejected.child(this.image_key).set(image_key, (error) => {
+          images_rejected.child(this.image_key).set(image_key, error => {
             this.showAlertForImages(error, "Image rejected successfully");
           });
         } else {
@@ -211,17 +215,18 @@ export default {
             }
           });
           rejected_images_container[this.images[imageIndex][".key"]] = 1;
-          images_rejected.child(this.image_key).set(rejected_images_container, (error) => {
-            this.showAlertForImages(error);
-          });
+          images_rejected
+            .child(this.image_key)
+            .set(rejected_images_container, error => {
+              this.showAlertForImages(error);
+            });
         }
         images_container
           .child(this.image_key)
           .child(this.images[imageIndex][".key"])
           .remove();
         this.getAllData();
-      }
-      else{
+      } else {
         let error = {};
         error.message = "You can not Approve or Reject image!";
         this.showAlertForImages(error);
@@ -232,7 +237,7 @@ export default {
       let imageIndex = this.getSelectedImageIndex();
       burgersRef
         .child(this.image_key)
-        .update({ highlight_image: this.images[imageIndex] }, (error) => {
+        .update({ highlight_image: this.images[imageIndex] }, error => {
           this.showAlertForThumbnail(error);
         });
     },
@@ -267,23 +272,22 @@ export default {
       }
       return imageIndex;
     },
-    showAlertForImages: function(error, message){
-      if(error){
+    showAlertForImages: function(error, message) {
+      if (error) {
         this.showProcessingImage = false;
         this.alertMessage = error.message;
         this.alertType = "danger";
         this.showAlertImage = true;
-      }
-      else{
+      } else {
         this.showProcessingImage = false;
-        if(message){
+        if (message) {
           this.alertMessage = message;
         }
         this.alertType = "primary";
         this.showAlertImage = true;
       }
     },
-    showAlertForThumbnail: function(error){
+    showAlertForThumbnail: function(error) {
       if (error) {
         this.showProcessing = false;
         this.alertMessage = error.message;
@@ -336,16 +340,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.image{
-    position:relative;
-    overflow:hidden;
-    padding-bottom:100%;
+.image {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 100%;
 }
-.image img{
-    position: absolute;
-    width: 100%;
+.image img {
+  position: absolute;
+  width: 100%;
 }
-.img-responsive{
+.img-responsive {
   display: block;
   max-width: 100%;
   top: 50%;
