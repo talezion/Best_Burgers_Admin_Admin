@@ -25,8 +25,8 @@
         <div class="row">
           <div class="col-md-3 text-center mb-4" v-for="(place, index) in places" :key="index">
             <div class="image">
-            <img :src="place.highlight_image.url" v-if="place.highlight_image" class="img img-responsive full-width" />
-            <img src="favicon.png" v-else class="img img-responsive full-width" />
+              <img :src="place.highlight_image.url" v-if="place.highlight_image" class="img img-responsive full-width" />
+              <img src="favicon.png" v-else class="img img-responsive full-width" />
             </div>
             <p>{{place.burger_name}}</p>
             <div class="d-flex">
@@ -134,17 +134,20 @@ export default {
 
 <style lang="scss" scoped>
 .image{
-    position:relative;
-    overflow:hidden;
-    padding-bottom:100%;
+  background: rgb(171, 171, 171);
+  position:relative;
+  overflow:hidden;
+  padding-bottom:100%;
 }
 .image img{
-    position:absolute;
-    width: 100%;
+  position:absolute;
+  width: 100%;
 }
 .img-responsive{
   display: block;
   max-width: 100%;
-  height: 100%;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
 }
 </style>

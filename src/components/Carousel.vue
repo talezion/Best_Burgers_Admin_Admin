@@ -348,6 +348,8 @@ export default {
 .img-responsive{
   display: block;
   max-width: 100%;
-  height: 100%;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
 }
 </style>
