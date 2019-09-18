@@ -176,7 +176,8 @@ PATCH /burgers/{burger_id}.json
 
 #### Login creds
 ```
-username: admin-dev@bestburgers.app
+Admin username: admin-dev@bestburgers.app
+Viewers username: non-admin-dev@bestburgers.app
 password: cd'@]P9Hb6buQ*!J
 ```
 
