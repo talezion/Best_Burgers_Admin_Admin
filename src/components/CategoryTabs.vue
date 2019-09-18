@@ -104,7 +104,11 @@ export default {
     },
     approveClicked: function(place){
       this.showProcessing = true;
-      burgersRef.child(place['.key']).update({was_reviewed: true, is_validated: true}, (error) => {
+      let obj = {
+        was_reviewed: true,
+        is_validated: true,
+      };
+      burgersRef.child(place['.key']).update(obj, (error) => {
         this.showPlaceAlert(error, "Approved successfully");
       });
     },

@@ -164,13 +164,12 @@ export default {
     },
     approveClicked: function() {
       this.showProcessingImage = true;
-      if (this.approved_images_container_keys.length > 1) {
         let imageIndex = this.getSelectedImageIndex();
         if (this.checkIfApprovedExist() == -1) {
           let image_key = {};
           image_key[this.images[imageIndex][".key"]] = 1;
           images_approved.child(this.image_key).set(image_key, error => {
-            this.showAlertForImages(error);
+            this.showAlertForImages(error, "Approved");
           });
         } else {
           let approved_images_container = [];
@@ -183,29 +182,28 @@ export default {
           images_approved
             .child(this.image_key)
             .set(approved_images_container, error => {
-              this.showAlertForImages(error);
+              this.showAlertForImages(error, "Approved");
             });
         }
         images_container
           .child(this.image_key)
           .child(this.images[imageIndex][".key"])
-          .remove();
-        this.getAllData();
-      } else {
-        let error = {};
-        error.message = "You can not Approve or Reject image!";
-        this.showAlertForImages(error);
-      }
+          .remove()
+          .then(() => {
+            this.getAllData();
+          })
+          .catch((error) => {
+
+          });
     },
     rejectClicked: function() {
       this.showProcessingImage = true;
-      if (this.approved_images_container_keys.length > 1) {
         let imageIndex = this.getSelectedImageIndex();
         if (this.checkIfRejectedExist() == -1) {
           let image_key = {};
           image_key[this.images[imageIndex][".key"]] = 1;
           images_rejected.child(this.image_key).set(image_key, error => {
-            this.showAlertForImages(error, "Image rejected successfully");
+            this.showAlertForImages(error, "Rejected");
           });
         } else {
           let rejected_images_container = [];
@@ -218,27 +216,32 @@ export default {
           images_rejected
             .child(this.image_key)
             .set(rejected_images_container, error => {
-              this.showAlertForImages(error);
+              this.showAlertForImages(error, "Rejected");
             });
         }
         images_container
           .child(this.image_key)
           .child(this.images[imageIndex][".key"])
-          .remove();
-        this.getAllData();
-      } else {
-        let error = {};
-        error.message = "You can not Approve or Reject image!";
-        this.showAlertForImages(error);
-      }
+          .remove()
+          .then(() => {
+            this.getAllData();
+          })
+          .catch((error) => {
+
+          });
     },
     setClicked: function() {
       this.showProcessing = true;
       let imageIndex = this.getSelectedImageIndex();
       burgersRef
         .child(this.image_key)
-        .update({ highlight_image: this.images[imageIndex] }, error => {
-          this.showAlertForThumbnail(error);
+        .update({ highlight_image: this.images[imageIndex] }, (error) => {
+          if(error){
+            this.showAlertForThumbnail(error);
+          }
+          else{
+            this.showAlertForThumbnail();
+          }
         });
     },
     checkIfApprovedExist: function() {

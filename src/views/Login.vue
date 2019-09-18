@@ -48,7 +48,7 @@ export default {
         (user) => {
           let users1 = users.orderByChild('email').equalTo(user.user.email).on("value", (snapshot) => {
             snapshot.forEach((childSnapshot) => {
-              if(childSnapshot.val().role){
+              if(childSnapshot.val().role && childSnapshot.val().role.toLowerCase() == "admin"){
                 this.$router.push('home');  
               }
               else{
