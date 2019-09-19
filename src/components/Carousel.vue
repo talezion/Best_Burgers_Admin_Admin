@@ -304,6 +304,7 @@ export default {
       }
     },
     getAllData: function() {
+      this.resetAll();
       this.getBurgerPlace();
       if (this.type == "thumbnail") {
         this.approved_images_ids.forEach(element => {
@@ -334,6 +335,20 @@ export default {
             this.burger_place = childSnapshot.val();
           });
         });
+    },
+    resetAll: function(){
+      this.slide = 0;
+      this.sliding = null;
+      this.current_images = [];
+      this.approved_images_container = [];
+      this.approved_images_container_keys = [];
+      this.burger_place = {};
+      this.showProcessing = false;
+      this.showAlert = false;
+      this.alertMessage = "";
+      this.alertType = "";
+      this.showProcessingImage = false;
+      this.showAlertImage =  false;
     }
   },
   mounted() {
