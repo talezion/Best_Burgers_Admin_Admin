@@ -1,0 +1,14 @@
+{
+  "name": "best-burger-admin-panel",
+  "short_name": "best-burger-admin-panel",
+  "icons": [
+    {
+      "src": "./img/icons/favicon.png",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#4DBA87"
+}
