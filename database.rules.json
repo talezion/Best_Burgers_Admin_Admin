@@ -1,0 +1,177 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write" : false,
+
+    "activity" : {
+      
+      "$id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+      
+    "activity_feed" : {
+      ".indexOn" : [".value"],
+        
+      "$id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+      
+    "activity_user" : {
+      
+      "$id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+      
+    "burger_comments" : {
+      
+      "$id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+      
+    "burger_openning_hours" : {
+      
+      "$id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+      
+    "burgers": {
+      ".indexOn": ["location/geohash", "burger_search_name", "burger_name", "is_validated", "was_reviewed", ".value"],
+     
+      "$burger_id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous' && (newData.child('added_by').val() == auth.uid || root.child('users').child(auth.uid).child('role').val() == 'admin')",
+          
+        "was_reviewed" : {
+          ".validate" : "data.val() == true || newData.val() == false || (newData.val() == true && root.child('users').child(auth.uid).child('role').val() == 'admin')"
+        },
+          
+        "is_validated" : {
+          ".validate" : "newData.val() == false || newData.val() == data.val() || root.child('users').child(auth.uid).child('role').val() == 'admin'"
+        }
+      }
+    },
+      
+    "burgers_record" : {
+      
+      "$id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+        
+      
+    },
+      
+    "check_ins" : {
+      
+      ".write" : "auth != null && auth.provider != 'anonymous'",
+      
+        // Checking if the same user writes on their node
+      "$id" : {
+        ".validate" : "$id == auth.uid"
+      }
+    },
+      
+    "check_ins_burger" : {
+      
+      ".write" : "auth != null && auth.provider != 'anonymous'",
+        
+      "$checkin_id" : {
+        
+        "$burger_id" : {
+          ".validate" : "newData.child('user_id').val() == auth.uid"
+        }
+      }
+    },
+      
+    "comments" : {
+      ".indexOn" : ["to_id"],
+      
+      "$id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+    
+    "followers" : {
+      "$uid" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+      
+    "following" : {
+      
+      "$uid" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+      }
+    },
+    "images" : {
+      ".indexOn": ["added_by"],
+      
+      "$image_id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'",
+        
+          "added_by" : {
+            ".validate" : "newData.val() == auth.uid"
+          },
+            
+          "is_validated" : {
+            ".validate" : "newData.val() == false || (newData.val() == true && root.child('users').child(auth.uid).child('role').val() == 'admin')"
+        }
+      }
+    },
+      
+      /// Needs to be checked
+    "images_approved" : {
+      "$burger_id" : {
+        ".write" : "root.child('users').child(auth.uid).child('role').val() == 'admin'"
+      }
+    },
+    
+    "images_container" : {
+      "$burger_id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous'"
+      }
+    },
+      
+    "images_rejected" : {
+      "$burger_id" : {
+        ".write" : "auth != null && auth.provider != 'anonymous' && root.child('users').child(auth.uid).child('role').val() == 'admin'"
+      }
+    },
+      
+    "likes" : {
+      "$burger_id" : {
+        "$uid" : {
+           ".write" : "$uid == auth.uid && auth.provider != 'anonymous'"
+        }
+      }
+    },
+    "points_record" : {
+      "$uid" : {
+        ".write" : "$uid == auth.uid && auth.provider != 'anonymous'"
+      }
+    },
+      
+    "user_likes" : {
+      
+      "$uid" : {
+        ".write" : "$uid == auth.uid && auth.provider != 'anonymous'"
+      }
+    },
+      
+    "users" : {
+      ".indexOn" : ["name", "username", "role"],
+      
+      "$uid" : {
+        	".write" : "auth.provider != 'anonymous' && $uid == auth.uid",
+            
+          // "points" : {
+          //   ".validate" : "data.val() <= newData.val()"
+          // }
+      },
+    }
+      
+  }
+}

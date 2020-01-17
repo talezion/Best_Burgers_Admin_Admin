@@ -12,39 +12,37 @@ const router = new Router({
   routes: [
     {
       path: "*",
-      component: Login,
+      component: Login
     },
     {
       path: "/",
-      component: Login,
+      component: Login
     },
     {
       path: "/login",
       name: "login",
-      component: Login,
+      component: Login
     },
     {
       path: "/home",
       name: "home",
       component: Home,
       meta: {
-        requeriesAuth: true,
+        requeriesAuth: true
       }
-    },
+    }
   ]
 });
 
-router.beforeEach((to, from, next) =>{
+router.beforeEach((to, from, next) => {
   const currentUser = firebase.auth().currentUser;
   const requeriesAuth = to.matched.some(record => record.meta.requeriesAuth);
 
-  if(requeriesAuth && !currentUser){
-    next('login');
-  }
-  else if(!requeriesAuth && currentUser){
-    next('home');
-  }
-  else{
+  if (requeriesAuth && !currentUser) {
+    next("login");
+  } else if (!requeriesAuth && currentUser) {
+    next("home");
+  } else {
     next();
   }
 });
