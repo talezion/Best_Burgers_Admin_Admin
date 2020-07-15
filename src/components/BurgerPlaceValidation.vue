@@ -11,12 +11,12 @@
         :key="index"
       >
         <div class="image">
-          <img
+          <!-- <img
             :src="place.highlight_image.url"
             v-if="place.highlight_image"
             class="img img-responsive full-width"
           />
-          <img src="favicon.png" v-else class="img img-responsive full-width" />
+          <img src="favicon.png" v-else class="img img-responsive full-width" /> -->
         </div>
         <p>{{ place.burger_name }}</p>
         <div class="d-flex">
@@ -46,11 +46,11 @@
 </template>
 
 <script>
-import LoadingAnimation from "@/components/LoadingAnimation";
-import Alert from "@/components/Alert";
-import { burgersRef } from "../firebase";
+import LoadingAnimation from '@/components/LoadingAnimation'
+import Alert from '@/components/Alert'
+import { burgersRef } from '../firebase'
 export default {
-  name: "BurgerPlaceValidation",
+  name: 'BurgerPlaceValidation',
   components: {
     LoadingAnimation,
     Alert
@@ -60,61 +60,61 @@ export default {
       places: [],
       showProcessing: false,
       showAlert: false
-    };
+    }
   },
   methods: {
     hideAlert: function() {
-      this.showAlert = false;
-      this.alertMessage = "";
+      this.showAlert = false
+      this.alertMessage = ''
     },
     approveClicked: function(place, index) {
-      this.showProcessing = true;
+      this.showProcessing = true
       let obj = {
         was_reviewed: true,
         is_validated: true
-      };
-      burgersRef.child(place["key"]).update(obj, error => {
-        this.showPlaceAlert(error, "Approved successfully");
-        this.places.splice(index, 1);
-      });
+      }
+      burgersRef.child(place['key']).update(obj, error => {
+        this.showPlaceAlert(error, 'Approved successfully')
+        this.places.splice(index, 1)
+      })
     },
     rejectClicked: function(place, index) {
-      this.showProcessing = true;
+      this.showProcessing = true
       burgersRef
-        .child(place["key"])
+        .child(place['key'])
         .update({ was_reviewed: true, is_validated: false }, error => {
-          this.showPlaceAlert(error, "Rejected successfully");
-          this.places.splice(index, 1);
-        });
+          this.showPlaceAlert(error, 'Rejected successfully')
+          this.places.splice(index, 1)
+        })
     },
     showPlaceAlert: function(error, message) {
       if (error) {
-        this.showProcessing = false;
-        this.alertMessage = error.message;
-        this.alertType = "danger";
-        this.showAlert = true;
+        this.showProcessing = false
+        this.alertMessage = error.message
+        this.alertType = 'danger'
+        this.showAlert = true
       } else {
-        this.showProcessing = false;
-        this.alertMessage = message;
-        this.alertType = "success";
-        this.showAlert = true;
+        this.showProcessing = false
+        this.alertMessage = message
+        this.alertType = 'success'
+        this.showAlert = true
       }
     }
   },
   mounted: function() {
     burgersRef
-      .orderByChild("was_reviewed")
+      .orderByChild('was_reviewed')
       .equalTo(false)
-      .once("value", snapshot => {
+      .once('value', snapshot => {
         snapshot.forEach(childSnapshot => {
-          var childKey = childSnapshot.key;
-          var childData = childSnapshot.val();
-          childData["key"] = childKey;
-          this.places.push(childData);
-        });
-      });
+          var childKey = childSnapshot.key
+          var childData = childSnapshot.val()
+          childData['key'] = childKey
+          this.places.push(childData)
+        })
+      })
   }
-};
+}
 </script>
 
 <style lang="scss" scoped>

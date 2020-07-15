@@ -1,10 +1,19 @@
 <template>
-  <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+  <div class="lds-roller">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
 </template>
 
 <script>
 export default {
- name: "LoadingAnimation"
+  name: 'LoadingAnimation'
 }
 </script>
 
@@ -20,7 +29,7 @@ export default {
   transform-origin: 32px 32px;
 }
 .lds-roller div:after {
-  content: " ";
+  content: ' ';
   display: block;
   position: absolute;
   width: 6px;
