@@ -11,12 +11,16 @@
         :key="index"
       >
         <div class="image">
-          <!-- <img
+          <v-lazy-image
             :src="place.highlight_image.url"
             v-if="place.highlight_image"
             class="img img-responsive full-width"
           />
-          <img src="favicon.png" v-else class="img img-responsive full-width" /> -->
+          <v-lazy-image
+            src="favicon.png"
+            v-else
+            class="img img-responsive full-width"
+          />
         </div>
         <p>{{ place.burger_name }}</p>
         <div class="d-flex">

@@ -41,6 +41,14 @@
           v-for="(images1, index1) in container_image"
           :key="index1"
         >
+          <!-- <v-lazy-image
+            v-if="getImageUrl(index1)"
+            class="img img-responsive full-width"
+            :src="getImageUrl(index1)"
+            slot="img"
+            alt="image slot"
+            src-placeholder="https://cdn-images-1.medium.com/max/80/1*xjGrvQSXvj72W4zD6IWzfg.jpeg"
+          /> -->
           <!-- <img
             v-if="getImageUrl(index1)"
             slot="img"
