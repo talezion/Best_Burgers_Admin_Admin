@@ -5,28 +5,27 @@
         class="btn btn-danger mr-2"
         @click="previousClicked"
         :disabled="isPreviousDisabled"
-      >
-        Previous
-      </button>
-      <button
-        class="btn btn-success"
-        @click="nextClicked"
-        :disabled="isNextDisabled"
-      >
-        Next
-      </button>
+      >Previous</button>
+      <button class="btn btn-success" @click="nextClicked" :disabled="isNextDisabled">Next</button>
+    </div>
+    <div class="col-md-12 float-right mb-2">
+      <b-pagination
+        v-model="currentPage"
+        :total-rows="image_keys.length"
+        :per-page="perPage"
+        aria-controls="my-table"
+        class="float-right"
+      ></b-pagination>
     </div>
     <div class="col-md-12 text-center mb-2">
-      <Alert v-if="showAlert" @countDownEnded="hideAlert" :type="alertType">{{
+      <Alert v-if="showAlert" @countDownEnded="hideAlert" :type="alertType">
+        {{
         alertMessage
-      }}</Alert>
+        }}
+      </Alert>
       <LoadingAnimation v-if="showProcessing" />
     </div>
-    <div
-      v-for="(container_image, index) in images_container"
-      :key="index"
-      class="col-md-3"
-    >
+    <div v-for="(container_image, index) in images_container" :key="index" class="col-md-3">
       <b-carousel
         id="carousel-1"
         :interval="0"
@@ -36,11 +35,7 @@
         background="#ababab"
         style="text-shadow: 1px 1px 2px #333;"
       >
-        <b-carousel-slide
-          class="image"
-          v-for="(images1, index1) in container_image"
-          :key="index1"
-        >
+        <b-carousel-slide class="image" v-for="(images1, index1) in container_image" :key="index1">
           <!-- <v-lazy-image
             v-if="getImageUrl(index1)"
             class="img img-responsive full-width"
@@ -48,14 +43,14 @@
             slot="img"
             alt="image slot"
             src-placeholder="https://cdn-images-1.medium.com/max/80/1*xjGrvQSXvj72W4zD6IWzfg.jpeg"
-          /> -->
+          />-->
           <!-- <img
             v-if="getImageUrl(index1)"
             slot="img"
             class="img img-responsive full-width"
             :src="getImageUrl(index1)"
             alt="image slot"
-          /> -->
+          />-->
         </b-carousel-slide>
       </b-carousel>
       <p class="text-center">{{ places[index].burger_name }}</p>
@@ -63,15 +58,11 @@
         <button
           class="btn btn-primary flex-fill"
           @click="approveClicked(images_container_keys[index], index)"
-        >
-          Approve
-        </button>
+        >Approve</button>
         <button
           class="btn btn-danger flex-fill"
           @click="rejectClicked(images_container_keys[index], index)"
-        >
-          Reject
-        </button>
+        >Reject</button>
       </div>
       <br />
     </div>
@@ -112,7 +103,60 @@ export default {
       previous_images_container_keys: [],
       approved_images: [],
       rejected_images: [],
-      slides: []
+      slides: [],
+      itemsOfPage: [],
+      image_keys: [],
+      perPage: 20,
+      currentPage: 1
+    }
+  },
+  watch: {
+    currentPage: function(val) {
+      let startIndex = (val - 1) * 20
+      images_approved
+        .orderByKey()
+        .startAt(this.image_keys[startIndex])
+        .limitToFirst(20)
+        .once('value', snapshot => {
+          if (snapshot.numChildren() > 0) {
+            this.resetAll()
+            console.log(
+              this.image_keys.length,
+              snapshot.numChildren(),
+              this.image_keys[startIndex - 1],
+              this.image_keys[startIndex],
+              this.lastKey,
+              startIndex
+            )
+            this.isPreviousDisabled = false
+            this.isNextDisabled = false
+            snapshot.forEach(childSnapshot => {
+              var childKey = childSnapshot.key
+              var childData = childSnapshot.val()
+              burgersRef
+                .orderByKey()
+                .equalTo(childKey)
+                .once('value', snapshot1 => {
+                  snapshot1.forEach(childSnapshot1 => {
+                    var childKey1 = childSnapshot1.key
+                    var childData1 = childSnapshot1.val()
+                    childData1['key'] = childKey1
+                    this.places.push(childData1)
+                    this.previous_places.push(childData1)
+                  })
+                  //this.previous_places = this.previous_places.concat(this.places);
+                  this.images_container.push(childData)
+                  this.images_container_keys.push(childKey)
+                  this.slides.push(0)
+                  this.lastKey = childKey
+                  this.previous_images_container.push(childData)
+                  this.previous_images_container_keys.push(childKey)
+                })
+            })
+          } else {
+            this.isNextDisabled = true
+          }
+        })
     }
   },
   methods: {
@@ -314,14 +358,22 @@ export default {
                   this.images_container_keys.push(childKey)
                   this.slides.push(0)
                   this.lastKey = childKey
-                  this.previous_images_container.push(childData)
-                  this.previous_images_container_keys.push(childKey)
+                  //this.previous_images_container.push(childData)
+                  //this.previous_images_container_keys.push(childKey)
                 })
             })
           } else {
             this.isNextDisabled = true
           }
         })
+    },
+    getInitialsOfPages() {
+      this.image_keys = []
+      images_container.orderByKey().once('value', snapshot => {
+        snapshot.forEach(childSnapshot => {
+          this.image_keys.push(childSnapshot.key)
+        })
+      })
     },
     nextClicked: function() {
       images_container
@@ -405,6 +457,7 @@ export default {
   },
   mounted: function() {
     this.getData()
+    this.getInitialsOfPages()
   }
 }
 </script>
