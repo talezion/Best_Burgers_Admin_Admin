@@ -345,51 +345,9 @@ export default {
                 })
               })
           })
-        } else {
-          this.isNextDisabled = true
         }
       })
     },
-    getInitialsOfPages() {
-      this.image_keys = []
-      if (this.filter == 'all') {
-        images_approved.orderByKey().once('value', snapshot => {
-          if (snapshot.numChildren() > 0) {
-            snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              this.image_keys.push(childKey)
-            })
-          }
-        })
-      } else {
-        images_approved.orderByKey().once('value', snapshot => {
-          if (snapshot.numChildren() > 0) {
-            snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              var childData = childSnapshot.val()
-              burgersRef
-                .orderByKey()
-                .equalTo(childKey)
-                .once('value', snapshot1 => {
-                  snapshot1.forEach(childSnapshot1 => {
-                    var childKey1 = childSnapshot1.key
-                    var childData1 = childSnapshot1.val()
-                    childData1['key'] = childKey1
-                    if (
-                      this.filter == 'noThumbnail' &&
-                      !childData1.highlight_image
-                    ) {
-                      this.image_keys.push(childKey)
-                    }
-                  })
-                })
-            })
-          } else {
-            this.isNextDisabled = true
-          }
-        })
-      }
-    }
   },
   mounted: function() {
     this.getInitialData()

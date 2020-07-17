@@ -1,13 +1,5 @@
 <template>
   <div class="mt-3 row">
-    <div class="col-md-12 text-right mb-2">
-      <button
-        class="btn btn-danger mr-2"
-        @click="previousClicked"
-        :disabled="isPreviousDisabled"
-      >Previous</button>
-      <button class="btn btn-success" @click="nextClicked" :disabled="isNextDisabled">Next</button>
-    </div>
     <div class="col-md-12 float-right mb-2">
       <b-pagination
         v-model="currentPage"
@@ -16,6 +8,20 @@
         aria-controls="my-table"
         class="float-right"
       ></b-pagination>
+    </div>
+    <div class="col">
+      <div class="form-group">
+        <select
+          v-model="filter"
+          @change="filterChanged"
+          class="form-control"
+          :disabled="isFilterDisabled"
+        >
+          <option value="notApproved">Not approved</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
     </div>
     <div class="col-md-12 text-center mb-2">
       <Alert v-if="showAlert" @countDownEnded="hideAlert" :type="alertType">
@@ -36,21 +42,13 @@
         style="text-shadow: 1px 1px 2px #333;"
       >
         <b-carousel-slide class="image" v-for="(images1, index1) in container_image" :key="index1">
-          <!-- <v-lazy-image
+          <v-lazy-image
             v-if="getImageUrl(index1)"
             class="img img-responsive full-width"
             :src="getImageUrl(index1)"
             slot="img"
             alt="image slot"
-            src-placeholder="https://cdn-images-1.medium.com/max/80/1*xjGrvQSXvj72W4zD6IWzfg.jpeg"
-          />-->
-          <!-- <img
-            v-if="getImageUrl(index1)"
-            slot="img"
-            class="img img-responsive full-width"
-            :src="getImageUrl(index1)"
-            alt="image slot"
-          />-->
+          />
         </b-carousel-slide>
       </b-carousel>
       <p class="text-center">{{ places[index].burger_name }}</p>
@@ -88,48 +86,57 @@ export default {
   },
   data: function() {
     return {
-      isPreviousDisabled: true,
-      isNextDisabled: true,
       alertMessage: null,
       alertType: null,
-      lastKey: null,
       showProcessing: false,
       showAlert: false,
       places: [],
-      previous_places: [],
       images_container: [],
-      previous_images_container: [],
       images_container_keys: [],
-      previous_images_container_keys: [],
       approved_images: [],
       rejected_images: [],
       slides: [],
       itemsOfPage: [],
       image_keys: [],
-      perPage: 20,
-      currentPage: 1
+      perPage: 12,
+      currentPage: 1,
+      cachedImagesContainer: [],
+      cachedPlaces: [],
+      cachedImagesContainerKeys: [],
+      filter: 'notApproved',
+      isFilterDisabled: false
     }
   },
   watch: {
     currentPage: function(val) {
-      let startIndex = (val - 1) * 20
-      images_approved
-        .orderByKey()
-        .startAt(this.image_keys[startIndex])
-        .limitToFirst(20)
-        .once('value', snapshot => {
+      let startIndex = (val - 1) * 12
+      this.resetAll()
+      this.places = this.cachedPlaces.slice(startIndex, startIndex + 12)
+      this.images_container_keys = this.cachedImagesContainerKeys.slice(
+        startIndex,
+        startIndex + 12
+      )
+      this.images_container = this.cachedImagesContainer.slice(
+        startIndex,
+        startIndex + 12
+      )
+    }
+  },
+  methods: {
+    async filterChanged() {
+      this.currentPage = 1
+      if (this.filter == 'noApproved') {
+        await this.getData()
+      } else if (this.filter == 'approved') {
+        this.images_container = []
+        this.images_container_keys = []
+        this.places = []
+
+        let localImagesKeys = []
+        let localImagesContainer = []
+        let i = 0
+        await images_approved.orderByKey().once('value', snapshot => {
           if (snapshot.numChildren() > 0) {
-            this.resetAll()
-            console.log(
-              this.image_keys.length,
-              snapshot.numChildren(),
-              this.image_keys[startIndex - 1],
-              this.image_keys[startIndex],
-              this.lastKey,
-              startIndex
-            )
-            this.isPreviousDisabled = false
-            this.isNextDisabled = false
             snapshot.forEach(childSnapshot => {
               var childKey = childSnapshot.key
               var childData = childSnapshot.val()
@@ -141,25 +148,75 @@ export default {
                     var childKey1 = childSnapshot1.key
                     var childData1 = childSnapshot1.val()
                     childData1['key'] = childKey1
-                    this.places.push(childData1)
-                    this.previous_places.push(childData1)
+                    localImagesKeys.push(childKey)
+                    this.cachedPlaces.push(childData1)
+                    this.cachedImagesContainerKeys.push(childKey)
+                    this.cachedImagesContainer.push(childData)
+                    if (localImagesContainer.length < 12) {
+                      this.slides.push(0)
+                      this.images_container_keys.push(childKey)
+                      this.places.push(childData1)
+                      localImagesContainer.push(childData)
+                    }
+                    if (snapshot.numChildren() - 1 == i) {
+                      this.image_keys = localImagesKeys
+                      this.images_container = this.cachedImagesContainer.slice(
+                        0,
+                        12
+                      )
+                    }
                   })
-                  //this.previous_places = this.previous_places.concat(this.places);
-                  this.images_container.push(childData)
-                  this.images_container_keys.push(childKey)
-                  this.slides.push(0)
-                  this.lastKey = childKey
-                  this.previous_images_container.push(childData)
-                  this.previous_images_container_keys.push(childKey)
+                  i++
                 })
             })
-          } else {
-            this.isNextDisabled = true
           }
         })
-    }
-  },
-  methods: {
+      } else if (this.filter == 'rejected') {
+        this.images_container = []
+        this.images_container_keys = []
+        this.places = []
+
+        let localImagesKeys = []
+        let localImagesContainer = []
+        let i = 0
+        await images_rejected.orderByKey().once('value', snapshot => {
+          if (snapshot.numChildren() > 0) {
+            snapshot.forEach(childSnapshot => {
+              var childKey = childSnapshot.key
+              var childData = childSnapshot.val()
+              burgersRef
+                .orderByKey()
+                .equalTo(childKey)
+                .once('value', snapshot1 => {
+                  snapshot1.forEach(childSnapshot1 => {
+                    var childKey1 = childSnapshot1.key
+                    var childData1 = childSnapshot1.val()
+                    childData1['key'] = childKey1
+                    localImagesKeys.push(childKey)
+                    this.cachedPlaces.push(childData1)
+                    this.cachedImagesContainerKeys.push(childKey)
+                    this.cachedImagesContainer.push(childData)
+                    if (localImagesContainer.length < 12) {
+                      this.slides.push(0)
+                      this.images_container_keys.push(childKey)
+                      this.places.push(childData1)
+                      localImagesContainer.push(childData)
+                    }
+                    if (snapshot.numChildren() - 1 == i) {
+                      this.image_keys = localImagesKeys
+                      this.images_container = this.cachedImagesContainer.slice(
+                        0,
+                        12
+                      )
+                    }
+                  })
+                  i++
+                })
+            })
+          }
+        })
+      }
+    },
     getImageUrl: function(imagekey) {
       let url = null
       for (var i = 0; i < this.images.length; i++) {
@@ -173,134 +230,121 @@ export default {
       this.showAlert = false
       this.alertMessage = ''
     },
-    approveClicked: function(placeKey, index) {
-      this.showProcessing = true
+    approveClicked: async function(placeKey, index) {
       var selected = this.slides[index]
       this.images_container_keys[index]
       var container = Object.keys(this.images_container[index])
       var selectedImageKey = container[selected]
-      for (let i = 0; i < this.images.length; i++) {
-        if (selectedImageKey == this.images[i].key) {
-          images_approved
-            .orderByKey()
-            .equalTo(placeKey)
-            .once('value', snapshot => {
-              if (snapshot.numChildren() > 0) {
-                let approved_images_container = []
+      await images_approved
+        .orderByKey()
+        .equalTo(placeKey)
+        .once('value', snapshot => {
+          if (snapshot.numChildren() > 0) {
+            let approved_images_container = []
+            images_approved
+              .orderByKey()
+              .equalTo(placeKey)
+              .once('value', snapshot => {
+                snapshot.forEach(childSnapshot => {
+                  var childKey = childSnapshot.key
+                  var childData = childSnapshot.val()
+                  childData['key'] = childKey
+                  approved_images_container.push(childData)
+                })
+                approved_images_container[selectedImageKey] = 1
                 images_approved
-                  .orderByKey()
-                  .equalTo(placeKey)
-                  .once('value', snapshot => {
-                    snapshot.forEach(childSnapshot => {
-                      var childKey = childSnapshot.key
-                      var childData = childSnapshot.val()
-                      childData['key'] = childKey
-                      approved_images_container.push(childData)
-                    })
-                    approved_images_container[selectedImageKey] = 1
-                    images_approved
-                      .child(placeKey)
-                      .set(approved_images_container, error => {
-                        this.showAlertForImages(error, 'Approved')
-                      })
+                  .child(placeKey)
+                  .set(approved_images_container, error => {
+                    alert('Approved')
                   })
-              } else {
-                let image_key = {}
-                image_key[selectedImageKey] = 1
-                images_approved.child(placeKey).set(image_key, error => {
-                  this.showAlertForImages(error, 'Approved')
-                })
-              }
+              })
+          } else {
+            let image_key = {}
+            image_key[selectedImageKey] = 1
+            images_approved.child(placeKey).set(image_key, error => {
+              alert('Approved')
             })
-          images_container
-            .child(placeKey)
-            .child(selectedImageKey)
-            .remove()
-            .then(() => {
-              let i = 0
-              for (const obj in this.images_container[index]) {
-                i++
-                obj
-              }
-              if (i == 1) {
-                this.images_container.splice(index, 1)
-                this.images_container_keys.splice(index, 1)
-                this.places.splice(index, 1)
-                this.previous_images_container.splice(index + 20, 1)
-                this.previous_images_container_keys.splice(index + 20, 1)
-                this.previous_places.splice(index + 20, 1)
-              } else {
-                delete this.images_container[index][selectedImageKey]
-              }
-            })
-            .catch(error => {
-              this.showAlertForImages(error, error.message)
-            })
-        }
-      }
+          }
+        })
+      await images_container
+        .child(placeKey)
+        .child(selectedImageKey)
+        .remove()
+        .then(() => {
+          if (Object.keys(this.images_container[index]).length == 1) {
+            this.images_container.splice(index, 1)
+            this.images_container_keys.splice(index, 1)
+            this.places.splice(index, 1)
+          } else {
+            let a = this.images_container
+            delete a[index][selectedImageKey]
+            this.images_container = []
+            this.images_container = a
+          }
+        })
+        .catch(error => {
+          console.log(error.message)
+        })
     },
-    rejectClicked: function(placeKey, index) {
-      this.showProcessing = true
+    rejectClicked: async function(placeKey, index) {
       var selected = this.slides[index]
       this.images_container_keys[index]
       var container = Object.keys(this.images_container[index])
       var selectedImageKey = container[selected]
-      for (let i = 0; i < this.images.length; i++) {
-        if (selectedImageKey == this.images[i].key) {
-          images_rejected
-            .orderByKey()
-            .equalTo(placeKey)
-            .once('value', snapshot => {
-              if (snapshot.numChildren() > 0) {
-                let rejected_images_container = []
-                images_rejected
-                  .orderByKey()
-                  .equalTo(placeKey)
-                  .once('value', snapshot => {
-                    snapshot.forEach(childSnapshot => {
-                      var childKey = childSnapshot.key
-                      var childData = childSnapshot.val()
-                      childData['key'] = childKey
-                      rejected_images_container.push(childData)
-                    })
-                    rejected_images_container[selectedImageKey] = 1
-                    images_rejected
-                      .child(placeKey)
-                      .set(rejected_images_container, error => {
-                        this.showAlertForImages(error, 'Rejected')
-                      })
-                  })
-              } else {
-                let image_key = {}
-                image_key[selectedImageKey] = 1
-                images_rejected.child(placeKey).set(image_key, error => {
-                  this.showAlertForImages(error, 'Rejected')
+
+      await images_rejected
+        .orderByKey()
+        .equalTo(placeKey)
+        .once('value', snapshot => {
+          if (snapshot.numChildren() > 0) {
+            let rejected_images_container = []
+            images_rejected
+              .orderByKey()
+              .equalTo(placeKey)
+              .once('value', snapshot => {
+                snapshot.forEach(childSnapshot => {
+                  var childKey = childSnapshot.key
+                  var childData = childSnapshot.val()
+                  childData['key'] = childKey
+                  rejected_images_container.push(childData)
                 })
-              }
+                rejected_images_container[selectedImageKey] = 1
+                images_rejected
+                  .child(placeKey)
+                  .set(rejected_images_container, error => {
+                    alert('Rejected')
+                  })
+              })
+          } else {
+            let image_key = {}
+            image_key[selectedImageKey] = 1
+            images_rejected.child(placeKey).set(image_key, error => {
+              alert('Rejected')
             })
-          images_container
-            .child(placeKey)
-            .child(selectedImageKey)
-            .remove()
-            .then(() => {
-              let i = 0
-              for (const obj in this.images_container[index]) {
-                i++
-                obj
-              }
-              if (i == 1) {
-                this.images_container.splice(index, 1)
-                this.images_container_keys.splice(index, 1)
-                this.places.splice(index, 1)
-              } else {
-                delete this.images_container[index][selectedImageKey]
-              }
-            })
-            .catch(error => {
-              this.showAlertForImages(error, error.message)
-            })
-        }
-      }
+          }
+        })
+      await images_container
+        .child(placeKey)
+        .child(selectedImageKey)
+        .remove()
+        .then(() => {
+          if (Object.keys(this.images_container[index]).length == 1) {
+            this.cachedImagesContainer.splice(index, 1)
+            this.cachedPlaces.splice(index, 1)
+            this.cachedImagesContainerKeys.splice(index, 1)
+            this.images_container.splice(index, 1)
+            this.images_container_keys.splice(index, 1)
+            this.places.splice(index, 1)
+          } else {
+            let a = this.images_container
+            delete a[index][selectedImageKey]
+            this.images_container = []
+            this.images_container = a
+          }
+        })
+        .catch(error => {
+          alert(error.message)
+        })
     },
     checkIfRejectedExist: function() {
       let placeIndex = -1
@@ -327,126 +371,50 @@ export default {
         this.showAlert = true
       }
     },
-    getData: function() {
+    getData: async function() {
       this.images_container = []
       this.images_container_keys = []
       this.places = []
-      this.previous_places = []
-      this.previous_images_container = []
-      this.previous_images_container_keys = []
-      images_container
-        .orderByKey()
-        .limitToFirst(20)
-        .once('value', snapshot => {
-          if (snapshot.numChildren() > 0) {
-            this.isNextDisabled = false
-            snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              var childData = childSnapshot.val()
-              burgersRef
-                .orderByKey()
-                .equalTo(childKey)
-                .once('value', snapshot1 => {
-                  snapshot1.forEach(childSnapshot1 => {
-                    var childKey1 = childSnapshot1.key
-                    var childData1 = childSnapshot1.val()
-                    childData1['key'] = childKey1
+
+      let localImagesKeys = []
+      let localImagesContainer = []
+      let i = 0
+      await images_container.orderByKey().once('value', snapshot => {
+        if (snapshot.numChildren() > 0) {
+          snapshot.forEach(childSnapshot => {
+            var childKey = childSnapshot.key
+            var childData = childSnapshot.val()
+            burgersRef
+              .orderByKey()
+              .equalTo(childKey)
+              .once('value', snapshot1 => {
+                snapshot1.forEach(childSnapshot1 => {
+                  var childKey1 = childSnapshot1.key
+                  var childData1 = childSnapshot1.val()
+                  childData1['key'] = childKey1
+                  localImagesKeys.push(childKey)
+                  this.cachedPlaces.push(childData1)
+                  this.cachedImagesContainerKeys.push(childKey)
+                  this.cachedImagesContainer.push(childData)
+                  if (localImagesContainer.length < 12) {
+                    this.slides.push(0)
+                    this.images_container_keys.push(childKey)
                     this.places.push(childData1)
-                    this.previous_places.push(childData1)
-                  })
-                  this.images_container.push(childData)
-                  this.images_container_keys.push(childKey)
-                  this.slides.push(0)
-                  this.lastKey = childKey
-                  //this.previous_images_container.push(childData)
-                  //this.previous_images_container_keys.push(childKey)
+                    localImagesContainer.push(childData)
+                  }
+                  if (snapshot.numChildren() - 1 == i) {
+                    this.image_keys = localImagesKeys
+                    this.images_container = this.cachedImagesContainer.slice(
+                      0,
+                      12
+                    )
+                  }
                 })
-            })
-          } else {
-            this.isNextDisabled = true
-          }
-        })
-    },
-    getInitialsOfPages() {
-      this.image_keys = []
-      images_container.orderByKey().once('value', snapshot => {
-        snapshot.forEach(childSnapshot => {
-          this.image_keys.push(childSnapshot.key)
-        })
-      })
-    },
-    nextClicked: function() {
-      images_container
-        .orderByKey()
-        .startAt(this.lastKey + 'a')
-        .limitToFirst(20)
-        .once('value', snapshot => {
-          if (snapshot.numChildren() > 0) {
-            this.resetAll()
-            //this.previous_places = this.previous_places.concat(this.places);
-            //this.previous_images_approved = this.previous_images_approved.concat(this.images_approved);
-            //this.previous_approved_keys = this.previous_approved_keys.concat(this.images_approved_keys);
-            this.isPreviousDisabled = false
-            this.isNextDisabled = false
-            snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              var childData = childSnapshot.val()
-              burgersRef
-                .orderByKey()
-                .equalTo(childKey)
-                .once('value', snapshot1 => {
-                  snapshot1.forEach(childSnapshot1 => {
-                    var childKey1 = childSnapshot1.key
-                    var childData1 = childSnapshot1.val()
-                    childData1['key'] = childKey1
-                    this.places.push(childData1)
-                    this.previous_places.push(childData1)
-                  })
-                  //this.previous_places = this.previous_places.concat(this.places);
-                  this.images_container.push(childData)
-                  this.images_container_keys.push(childKey)
-                  this.slides.push(0)
-                  this.lastKey = childKey
-                  this.previous_images_container.push(childData)
-                  this.previous_images_container_keys.push(childKey)
-                })
-            })
-          } else {
-            this.isNextDisabled = true
-          }
-        })
-    },
-    previousClicked: function() {
-      if (this.previous_images_container.length > 0) {
-        this.isPreviousDisabled = false
-        this.previous_places.splice(this.previous_places.length - 20, 20)
-        let length = 20
-        if (this.previous_places.length < 20) {
-          length = this.previous_places.length
+                i++
+              })
+          })
         }
-        this.places = this.previous_places.slice(
-          this.previous_places.length - length
-        )
-        this.previous_images_container.splice(
-          this.previous_images_container.length - 20,
-          20
-        )
-        this.images_container = this.previous_images_container.slice(
-          this.previous_images_container.length - length
-        )
-        this.previous_images_container_keys.splice(
-          this.previous_images_container_keys.length - 20,
-          20
-        )
-        this.images_container_keys = this.previous_images_container_keys.slice(
-          this.previous_images_container_keys.length - length
-        )
-        this.lastKey = this.images_container_keys[
-          this.images_container_keys.length - 1
-        ]
-      } else {
-        this.isPreviousDisabled = true
-      }
+      })
     },
     resetAll: function() {
       this.places = []
@@ -457,7 +425,6 @@ export default {
   },
   mounted: function() {
     this.getData()
-    this.getInitialsOfPages()
   }
 }
 </script>
