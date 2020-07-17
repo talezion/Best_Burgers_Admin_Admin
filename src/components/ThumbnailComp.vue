@@ -3,13 +3,24 @@
     <div class="col-md-12">
       <form @submit="searchQueryEntered">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search burger" v-model="searchQuery" />
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search burger"
+            @keyup.esc="resetSearch"
+            v-model="searchQuery"
+          />
         </div>
       </form>
     </div>
     <div class="col">
       <div class="form-group">
-        <select v-model="filter" @change="filterChanged" class="form-control">
+        <select
+          v-model="filter"
+          @change="filterChanged"
+          class="form-control"
+          :disabled="isFilterDisabled"
+        >
           <option value="all">All</option>
           <option value="noThumbnail">No Thumbnail</option>
         </select>
@@ -102,26 +113,42 @@ export default {
       cachedPlaces: [],
       originalApprovedImageKeys: [],
       originalApprovedImages: [],
-      originalPlaces: []
+      originalPlaces: [],
+      originalImageKeys: [],
+      isFilterDisabled: false
     }
   },
   watch: {
-    currentPage: function(val) {
+    currentPage: async function(val) {
       let startIndex = (val - 1) * 12
-      this.resetAll()
+      await this.resetAll()
       this.places = this.cachedPlaces.slice(startIndex, startIndex + 12)
-      this.images_approved = this.cachedImagesApproved.slice(
+      this.images_approved_keys = this.cachedImagesApprovedKeys.slice(
         startIndex,
         startIndex + 12
       )
-      console.log(this.cachedImagesApproved)
-      this.images_approved_keys = this.cachedImagesApprovedKeys.slice(
+      this.images_approved = this.cachedImagesApproved.slice(
         startIndex,
         startIndex + 12
       )
     }
   },
   methods: {
+    resetToInitialState() {
+      this.places = this.originalPlaces.slice(0, 12)
+      this.images_approved_keys = this.originalApprovedImageKeys.slice(0, 12)
+      this.images_approved = this.originalApprovedImages.slice(0, 12)
+      this.image_keys = this.originalImageKeys
+      this.cachedImagesApproved = this.originalApprovedImages
+      this.cachedImagesApprovedKeys = this.originalApprovedImageKeys
+      this.cachedPlaces = this.originalPlaces
+      this.currentPage = 1
+      this.isFilterDisabled = false
+    },
+    resetSearch() {
+      this.searchQuery = ''
+      this.resetToInitialState()
+    },
     async getInitialsOfSearched() {
       this.image_keys = []
       await images_approved.orderByKey().once('value', snapshot => {
@@ -144,103 +171,60 @@ export default {
     },
     searchQueryEntered(e) {
       e.preventDefault()
-      if (this.searchQuery.length > 3) {
-        this.image_keys = []
-        let local_images_approved = []
-        let local_images_keys = []
-        let i = 0
-        this.resetAll()
-        images_approved.orderByKey().once('value', snapshot => {
-          if (snapshot.numChildren() > 0) {
-            snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              var childData = childSnapshot.val()
-              burgersRef
-                .orderByKey()
-                .equalTo(childKey)
-                .once('value', snapshot1 => {
-                  snapshot1.forEach(childSnapshot1 => {
-                    var childData1 = childSnapshot1.val()
-                    if (
-                      childData1.burger_search_name.includes(this.searchQuery)
-                    ) {
-                      this.cachedImagesApproved.push(childData)
-                      this.cachedImagesApprovedKeys.push(childKey)
-                      this.cachedPlaces.push(childData1)
-                      if (snapshot.numChildren() - 1 == i) {
-                        this.image_keys = local_images_keys
-                      }
-                      local_images_keys.push(childKey)
-                      if (local_images_approved.length < 12) {
-                        this.places.push(childData1)
-                        local_images_approved.push(childData)
-                        this.images_approved_keys.push(childKey)
-                        this.slides.push(0)
-                      }
-                      if (
-                        local_images_approved.length == 12 ||
-                        local_images_keys.length < 12
-                      ) {
-                        this.images_approved = local_images_approved
-                      }
-                    }
-                    i++
-                  })
-                })
-            })
-          }
-        })
-      }
-    },
-    filterChanged() {
+      this.filter = 'all'
+      this.isFilterDisabled = true
       this.resetAll()
+      this.image_keys = []
+      let local_images_approved = []
+      let local_images_keys = []
+      let i = 0
       this.cachedPlaces = []
       this.cachedImagesApprovedKeys = []
       this.cachedImagesApproved = []
-      //this.getInitialsOfPages()
-      // if (this.filter == 'all') {
-      //   this.getInitialData()
-      // } else {
-      //   images_approved.orderByKey().once('value', snapshot => {
-      //     if (snapshot.numChildren() > 0) {
-      //       snapshot.forEach(childSnapshot => {
-      //         var childKey = childSnapshot.key
-      //         var childData = childSnapshot.val()
-      //         if (this.places.length < 12) {
-      //           burgersRef
-      //             .orderByKey()
-      //             .equalTo(childKey)
-      //             .once('value', snapshot1 => {
-      //               snapshot1.forEach(childSnapshot1 => {
-      //                 if (this.places.length >= 12) {
-      //                   return
-      //                 }
-      //                 var childKey1 = childSnapshot1.key
-      //                 var childData1 = childSnapshot1.val()
-      //                 childData1['key'] = childKey1
-      //                 if (
-      //                   this.filter == 'noThumbnail' &&
-      //                   !childData1.highlight_image &&
-      //                   this.places.length < 12
-      //                 ) {
-      //                   this.places.push(childData1)
-      //                   this.images_approved.push(childData)
-      //                   this.images_approved_keys.push(childKey)
-      //                   this.slides.push(0)
-      //                   this.lastKey = childKey
-      //                 }
-      //               })
-      //             })
-      //         }
-      //       })
-      //     }
-      //   })
-      // }
-      let localImagesApproved = []
-      let localImagesKeys = []
-      let i = 0
+      this.originalPlaces.forEach((place, index) => {
+        if (
+          place.burger_search_name
+            .toLowerCase()
+            .includes(this.searchQuery.toLowerCase())
+        ) {
+          local_images_approved.push(this.originalApprovedImages[index])
+          local_images_keys.push(this.originalImageKeys[index])
+          this.cachedImagesApprovedKeys.push(
+            this.originalApprovedImageKeys[index]
+          )
+          this.cachedPlaces.push(this.originalPlaces[index])
+          this.cachedImagesApproved.push(this.originalApprovedImages[index])
+          if (this.places.length < 12) {
+            this.images_approved_keys.push(
+              this.originalApprovedImageKeys[index]
+            )
+            this.places.push(this.originalPlaces[index])
+            this.slides.push(0)
+          }
+          if (local_images_approved.length == 12) {
+            this.images_approved = [...local_images_approved]
+          }
+        }
+        if (this.originalPlaces.length - 1 == index) {
+          this.image_keys = local_images_keys
+          if (this.places.length < 12) {
+            this.images_approved = [...local_images_approved]
+          }
+        }
+      })
+    },
+    async filterChanged() {
+      await this.resetAll()
       if (this.filter == 'all') {
+        await this.resetToInitialState()
       } else {
+        this.image_keys = []
+        this.cachedPlaces = []
+        this.cachedImagesApprovedKeys = []
+        this.cachedImagesApproved = []
+        let localImagesApproved = []
+        let localImagesKeys = []
+        let i = 0
         for (i = 0; i < this.originalPlaces.length; i++) {
           if (!this.originalPlaces[i].highlight_image) {
             if (this.places.length < 12) {
@@ -255,36 +239,14 @@ export default {
             this.cachedImagesApproved.push(this.originalApprovedImages[i])
             localImagesApproved.push(this.originalApprovedImages[i])
             localImagesKeys.push(this.originalApprovedImageKeys[i])
-            console.log('in smaller than 12')
           }
           if (localImagesApproved.length == 12) {
             this.images_approved = [...localImagesApproved]
-            console.log('in equal 12', this.images_approved.length)
           }
           if (this.originalPlaces.length - 1 == i) {
-            console.log(this.places.length)
             this.image_keys = localImagesKeys
           }
         }
-        // this.originalApprovedImages.forEach(approvedImage => {
-        //   this.originalPlaces.forEach(place => {
-        //     localImagesApproved.push(approvedImage)
-        //     localImagesKeys.push(approvedImage['key'])
-        //     if (!place.highlight_image && this.places.length < 12) {
-        //       this.places.push(place)
-        //       this.slides.push(0)
-        //       this.images_approved_keys.push(approvedImage['key'])
-        //     }
-        //     if (localImagesApproved.length == 12) {
-        //       this.images_approved = localImagesApproved
-        //     }
-        //     if (this.cachedImagesApproved.length - 1 == i) {
-        //       this.cachedImagesApproved = localImagesApproved
-        //       this.cachedImagesApprovedKeys
-        //     }
-        //   })
-        //   i++
-        // })
       }
     },
     hideAlert: function() {
@@ -308,7 +270,6 @@ export default {
       var selectedImageKey = approved[selected]
       for (let i = 0; i < this.images.length; i++) {
         if (selectedImageKey == this.images[i].key) {
-          console.log(placeKey)
           burgersRef
             .child(placeKey)
             .update({ highlight_image: this.images[i] }, error => {
@@ -377,6 +338,7 @@ export default {
                     this.originalPlaces = this.cachedPlaces
                     this.originalApprovedImages = this.cachedImagesApproved
                     this.originalApprovedImageKeys = this.cachedImagesApprovedKeys
+                    this.originalImageKeys = local_images_keys
                     this.image_keys = local_images_keys
                   }
                   i++
@@ -431,7 +393,6 @@ export default {
   },
   mounted: function() {
     this.getInitialData()
-    //this.getInitialsOfPages()
   }
 }
 </script>
