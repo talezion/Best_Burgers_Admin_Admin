@@ -103,9 +103,7 @@ export default {
       showProcessing: false,
       slides: [],
       alertType: '',
-      lastKey: null,
       filter: 'all',
-      itemsOfPage: [],
       image_keys: [],
       searchQuery: '',
       cachedImagesApproved: [],
@@ -255,12 +253,14 @@ export default {
     },
     getImageUrl: function(imagekey) {
       let url = null
-      for (var i = 0; i < this.images.length; i++) {
+      let i = 0
+      for (i; i < this.images.length; i++) {
         if (this.images[i]['key'] == imagekey) {
           return this.images[i].url
+        } else if (this.images.length - 1 == i) {
+          return url
         }
       }
-      return url
     },
     setClicked: function(placeKey, index) {
       this.showProcessing = true
@@ -309,7 +309,6 @@ export default {
       let i = 0
       await images_approved.orderByKey().once('value', snapshot => {
         if (snapshot.numChildren() > 0) {
-          this.isNextDisabled = false
           snapshot.forEach(childSnapshot => {
             var childKey = childSnapshot.key
             var childData = childSnapshot.val()
@@ -347,7 +346,7 @@ export default {
           })
         }
       })
-    },
+    }
   },
   mounted: function() {
     this.getInitialData()

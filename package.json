@@ -12,6 +12,7 @@
     "bootstrap-vue": "^2.0.0-rc.28",
     "core-js": "^2.6.5",
     "firebase": "^6.4.2",
+    "google-maps-api-loader": "^1.1.1",
     "register-service-worker": "^1.6.2",
     "v-lazy-image": "^1.4.0",
     "vue": "^2.6.10",

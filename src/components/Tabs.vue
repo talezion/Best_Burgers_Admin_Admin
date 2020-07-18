@@ -10,36 +10,45 @@
       <b-tab title="Burger Place Validation">
         <BurgerPlaceValidation />
       </b-tab>
+      <b-tab title="Map View">
+        <MapView />
+      </b-tab>
     </b-tabs>
   </div>
 </template>
 
 <script>
-import ThumbnailComp from "@/components/ThumbnailComp";
-import ImageValidationComp from "@/components/ImageValidationComp";
-import BurgerPlaceValidation from "@/components/BurgerPlaceValidation";
-import { images } from "../firebase";
+import ThumbnailComp from '@/components/ThumbnailComp'
+import { images } from '../firebase'
 export default {
-  name: "Tabs",
+  name: 'Tabs',
   components: {
     ThumbnailComp,
-    ImageValidationComp,
-    BurgerPlaceValidation
+    ImageValidationComp: () =>
+      import(
+        /* webpackPrefetch: true */ '@/components/ImageValidationComp.vue'
+      ),
+    BurgerPlaceValidation: () =>
+      import(
+        /* webpackPrefetch: true */ '@/components/BurgerPlaceValidation.vue'
+      ),
+    MapView: () =>
+      import(/* webpackPrefetch: true */ '@/components/MapView.vue')
   },
   data: function() {
     return {
       images: []
-    };
+    }
   },
   mounted() {
-    images.orderByKey().once("value", snapshot => {
+    images.orderByKey().once('value', snapshot => {
       snapshot.forEach(childSnapshot => {
-        var childKey = childSnapshot.key;
-        var childData = childSnapshot.val();
-        childData["key"] = childKey;
-        this.images.push(childData);
-      });
-    });
+        var childKey = childSnapshot.key
+        var childData = childSnapshot.val()
+        childData['key'] = childKey
+        this.images.push(childData)
+      })
+    })
   }
-};
+}
 </script>
