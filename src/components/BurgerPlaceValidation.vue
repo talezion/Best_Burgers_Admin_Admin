@@ -71,7 +71,7 @@ export default {
       showProcessing: false,
       showAlert: false,
       placeKeys: [],
-      perPage: 12,
+      perPage: 8,
       currentPage: 1,
       originalPlaces: [],
       cachedPlaces: [],
@@ -81,8 +81,8 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      let startIndex = (val - 1) * 12
-      this.places = this.originalPlaces.slice(startIndex, startIndex + 12)
+      let startIndex = (val - 1) * 8
+      this.places = this.originalPlaces.slice(startIndex, startIndex + 8)
     }
   },
   methods: {
@@ -103,10 +103,10 @@ export default {
               localPlaceKeys.push(childKey)
               this.originalPlaces.push(childData)
               this.cachedPlaces.push(childData)
-              if (localPlaces.length < 12) {
+              if (localPlaces.length < 8) {
                 localPlaces.push(childData)
               }
-              if (localPlaces.length == 12) {
+              if (localPlaces.length == 8) {
                 this.places = [...localPlaces]
               }
               if (snapshot.numChildren() - 1 == i) {
@@ -131,10 +131,10 @@ export default {
                 localPlaceKeys.push(childKey)
                 this.originalPlaces.push(childData)
                 this.cachedPlaces.push(childData)
-                if (localPlaces.length < 12) {
+                if (localPlaces.length < 8) {
                   localPlaces.push(childData)
                 }
-                if (localPlaces.length == 12) {
+                if (localPlaces.length == 8) {
                   this.places = [...localPlaces]
                 }
               }
@@ -160,10 +160,10 @@ export default {
                 localPlaceKeys.push(childKey)
                 this.originalPlaces.push(childData)
                 this.cachedPlaces.push(childData)
-                if (localPlaces.length < 12) {
+                if (localPlaces.length < 8) {
                   localPlaces.push(childData)
                 }
-                if (localPlaces.length == 12) {
+                if (localPlaces.length == 8) {
                   this.places = [...localPlaces]
                 }
               }
@@ -239,10 +239,10 @@ export default {
     //       localPlaceKeys.push(childKey)
     //       this.originalPlaces.push(childData)
     //       this.cachedPlaces.push(childData)
-    //       if (localPlaces.length < 12) {
+    //       if (localPlaces.length < 8) {
     //         localPlaces.push(childData)
     //       }
-    //       if (localPlaces.length == 12) {
+    //       if (localPlaces.length == 8) {
     //         this.places = [...localPlaces]
     //       }
     //       if (snapshot.numChildren() - 1 == i) {
@@ -262,10 +262,10 @@ export default {
           localPlaceKeys.push(childKey)
           this.originalPlaces.push(childData)
           this.cachedPlaces.push(childData)
-          if (localPlaces.length < 12) {
+          if (localPlaces.length < 8) {
             localPlaces.push(childData)
           }
-          if (localPlaces.length == 12) {
+          if (localPlaces.length == 8) {
             this.places = [...localPlaces]
           }
           if (snapshot.numChildren() - 1 == i) {

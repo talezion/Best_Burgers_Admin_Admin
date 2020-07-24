@@ -101,7 +101,7 @@ export default {
   data: function() {
     return {
       places: [],
-      perPage: 12,
+      perPage: 8,
       currentPage: 1,
       images_approved: [],
       images_approved_keys: [],
@@ -125,27 +125,26 @@ export default {
   },
   watch: {
     currentPage: async function(val) {
-      let startIndex = (val - 1) * 12
+      let startIndex = (val - 1) * 8
       this.showProcessing = true
       await this.resetAll()
-      this.places = this.cachedPlaces.slice(startIndex, startIndex + 12)
+      this.places = this.cachedPlaces.slice(startIndex, startIndex + 8)
       this.images_approved_keys = this.cachedImagesApprovedKeys.slice(
         startIndex,
-        startIndex + 12
+        startIndex + 8
       )
       this.images_approved = this.cachedImagesApproved.slice(
         startIndex,
-        startIndex + 12
+        startIndex + 8
       )
       this.showProcessing = false
     }
   },
   methods: {
-    onSlideEnd() {},
     resetToInitialState() {
-      this.places = this.originalPlaces.slice(0, 12)
-      this.images_approved_keys = this.originalApprovedImageKeys.slice(0, 12)
-      this.images_approved = this.originalApprovedImages.slice(0, 12)
+      this.places = this.originalPlaces.slice(0, 8)
+      this.images_approved_keys = this.originalApprovedImageKeys.slice(0, 8)
+      this.images_approved = this.originalApprovedImages.slice(0, 8)
       this.image_keys = this.originalImageKeys
       this.cachedImagesApproved = this.originalApprovedImages
       this.cachedImagesApprovedKeys = this.originalApprovedImageKeys
@@ -204,20 +203,20 @@ export default {
           )
           this.cachedPlaces.push(this.originalPlaces[index])
           this.cachedImagesApproved.push(this.originalApprovedImages[index])
-          if (this.places.length < 12) {
+          if (this.places.length < 8) {
             this.images_approved_keys.push(
               this.originalApprovedImageKeys[index]
             )
             this.places.push(this.originalPlaces[index])
             this.slides.push(0)
           }
-          if (local_images_approved.length == 12) {
+          if (local_images_approved.length == 8) {
             this.images_approved = [...local_images_approved]
           }
         }
         if (this.originalPlaces.length - 1 == index) {
           this.image_keys = local_images_keys
-          if (this.places.length < 12) {
+          if (this.places.length < 8) {
             this.images_approved = [...local_images_approved]
           }
         }
@@ -239,7 +238,7 @@ export default {
         let i = 0
         for (i = 0; i < this.originalPlaces.length; i++) {
           if (!this.originalPlaces[i].highlight_image) {
-            if (this.places.length < 12) {
+            if (this.places.length < 8) {
               this.places.push(this.originalPlaces[i])
               this.slides.push(0)
               this.images_approved_keys.push(this.originalApprovedImageKeys[i])
@@ -252,7 +251,7 @@ export default {
             localImagesApproved.push(this.originalApprovedImages[i])
             localImagesKeys.push(this.originalApprovedImageKeys[i])
           }
-          if (localImagesApproved.length == 12) {
+          if (localImagesApproved.length == 8) {
             this.images_approved = [...localImagesApproved]
           }
           if (this.originalPlaces.length - 1 == i) {
@@ -343,13 +342,13 @@ export default {
                   this.cachedImagesApproved.push(childData)
                   this.cachedImagesApprovedKeys.push(childKey)
                   local_images_keys.push(childKey)
-                  if (local_images_approved.length < 12) {
+                  if (local_images_approved.length < 8) {
                     this.places.push(childData1)
                     this.images_approved_keys.push(childKey)
                     local_images_approved.push(childData)
                     this.slides.push(0)
                   }
-                  if (local_images_approved.length == 12) {
+                  if (local_images_approved.length == 8) {
                     this.images_approved = local_images_approved
                   }
                   if (snapshot.numChildren() - 1 == i) {

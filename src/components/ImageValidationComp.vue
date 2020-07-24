@@ -98,7 +98,7 @@ export default {
       slides: [],
       itemsOfPage: [],
       image_keys: [],
-      perPage: 12,
+      perPage: 8,
       currentPage: 1,
       cachedImagesContainer: [],
       cachedPlaces: [],
@@ -109,16 +109,16 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      let startIndex = (val - 1) * 12
+      let startIndex = (val - 1) * 8
       this.resetAll()
-      this.places = this.cachedPlaces.slice(startIndex, startIndex + 12)
+      this.places = this.cachedPlaces.slice(startIndex, startIndex + 8)
       this.images_container_keys = this.cachedImagesContainerKeys.slice(
         startIndex,
-        startIndex + 12
+        startIndex + 8
       )
       this.images_container = this.cachedImagesContainer.slice(
         startIndex,
-        startIndex + 12
+        startIndex + 8
       )
     }
   },
@@ -155,7 +155,7 @@ export default {
                     this.cachedPlaces.push(childData1)
                     this.cachedImagesContainerKeys.push(childKey)
                     this.cachedImagesContainer.push(childData)
-                    if (localImagesContainer.length < 12) {
+                    if (localImagesContainer.length < 8) {
                       this.slides.push(0)
                       this.images_container_keys.push(childKey)
                       this.places.push(childData1)
@@ -165,7 +165,7 @@ export default {
                       this.image_keys = localImagesKeys
                       this.images_container = this.cachedImagesContainer.slice(
                         0,
-                        12
+                        8
                       )
                       this.showProcessing = false
                     }
@@ -202,7 +202,7 @@ export default {
                     this.cachedPlaces.push(childData1)
                     this.cachedImagesContainerKeys.push(childKey)
                     this.cachedImagesContainer.push(childData)
-                    if (localImagesContainer.length < 12) {
+                    if (localImagesContainer.length < 8) {
                       this.slides.push(0)
                       this.images_container_keys.push(childKey)
                       this.places.push(childData1)
@@ -212,7 +212,7 @@ export default {
                       this.image_keys = localImagesKeys
                       this.images_container = this.cachedImagesContainer.slice(
                         0,
-                        12
+                        8
                       )
                       this.showProcessing = false
                     }
@@ -413,7 +413,7 @@ export default {
                   this.cachedPlaces.push(childData1)
                   this.cachedImagesContainerKeys.push(childKey)
                   this.cachedImagesContainer.push(childData)
-                  if (localImagesContainer.length < 12) {
+                  if (localImagesContainer.length < 8) {
                     this.slides.push(0)
                     this.images_container_keys.push(childKey)
                     this.places.push(childData1)
@@ -423,7 +423,7 @@ export default {
                     this.image_keys = localImagesKeys
                     this.images_container = this.cachedImagesContainer.slice(
                       0,
-                      12
+                      8
                     )
                     this.showProcessing = false
                   }
