@@ -125,16 +125,19 @@ export default {
   methods: {
     async filterChanged() {
       this.currentPage = 1
-      if (this.filter == 'noApproved') {
+      this.showProcessing = true
+      if (this.filter == 'notApproved') {
         await this.getData()
       } else if (this.filter == 'approved') {
         this.images_container = []
         this.images_container_keys = []
         this.places = []
-
         let localImagesKeys = []
         let localImagesContainer = []
         let i = 0
+        this.cachedImagesContainer = []
+        this.cachedPlaces = []
+        this.cachedImagesContainerKeys = []
         await images_approved.orderByKey().once('value', snapshot => {
           if (snapshot.numChildren() > 0) {
             snapshot.forEach(childSnapshot => {
@@ -164,6 +167,7 @@ export default {
                         0,
                         12
                       )
+                      this.showProcessing = false
                     }
                   })
                   i++
@@ -175,9 +179,11 @@ export default {
         this.images_container = []
         this.images_container_keys = []
         this.places = []
-
         let localImagesKeys = []
         let localImagesContainer = []
+        this.cachedImagesContainer = []
+        this.cachedPlaces = []
+        this.cachedImagesContainerKeys = []
         let i = 0
         await images_rejected.orderByKey().once('value', snapshot => {
           if (snapshot.numChildren() > 0) {
@@ -208,6 +214,7 @@ export default {
                         0,
                         12
                       )
+                      this.showProcessing = false
                     }
                   })
                   i++
@@ -231,6 +238,7 @@ export default {
       this.alertMessage = ''
     },
     approveClicked: async function(placeKey, index) {
+      this.showProcessing = true
       var selected = this.slides[index]
       this.images_container_keys[index]
       var container = Object.keys(this.images_container[index])
@@ -285,8 +293,12 @@ export default {
         .catch(error => {
           console.log(error.message)
         })
+        .finally(() => {
+          this.showProcessing = false
+        })
     },
     rejectClicked: async function(placeKey, index) {
+      this.showProcessing = true
       var selected = this.slides[index]
       this.images_container_keys[index]
       var container = Object.keys(this.images_container[index])
@@ -345,6 +357,9 @@ export default {
         .catch(error => {
           alert(error.message)
         })
+        .finally(() => {
+          this.showProcessing = false
+        })
     },
     checkIfRejectedExist: function() {
       let placeIndex = -1
@@ -375,9 +390,11 @@ export default {
       this.images_container = []
       this.images_container_keys = []
       this.places = []
-
       let localImagesKeys = []
       let localImagesContainer = []
+      this.cachedImagesContainerKeys = []
+      this.cachedPlaces = []
+      this.cachedImagesContainer = []
       let i = 0
       await images_container.orderByKey().once('value', snapshot => {
         if (snapshot.numChildren() > 0) {
@@ -408,6 +425,7 @@ export default {
                       0,
                       12
                     )
+                    this.showProcessing = false
                   }
                 })
                 i++

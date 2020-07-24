@@ -2,14 +2,21 @@
   <div class="mt-3 row">
     <div class="col-md-12">
       <form @submit="searchQueryEntered">
-        <div class="form-group">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Search burger"
-            @keyup.esc="resetSearch"
-            v-model="searchQuery"
-          />
+        <div class="row">
+          <div class="col-md-9">
+            <div class="form-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search burger"
+                @keyup.esc="resetSearch"
+                v-model="searchQuery"
+              />
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <button class="btn btn-danger btn-block" type="button" @click="resetSearch">Clear</button>
+          </div>
         </div>
       </form>
     </div>
@@ -43,12 +50,12 @@
       </Alert>
       <LoadingAnimation v-if="showProcessing" />
     </div>
-    <div v-for="(approved_image, index) in images_approved" :key="index" class="col-md-3">
+    <div v-for="(approved_image, index2) in images_approved" :key="index2" class="col-md-3">
       <b-carousel
         id="carousel-1"
         :interval="0"
         controls
-        v-model="slides[index]"
+        v-model="slides[index2]"
         indicators
         background="#ababab"
         style="text-shadow: 1px 1px 2px #333;"
@@ -63,17 +70,17 @@
           />
           <p
             v-if="
-              places[index].highlight_image &&
-                places[index].highlight_image.url == getImageUrl(index1)
+              places[index2].highlight_image &&
+                places[index2].highlight_image.url == getImageUrl(index1)
             "
           >Thumbnail</p>
-          <p v-else-if="!places[index].highlight_image">No Thumbnail</p>
+          <p v-else-if="!places[index2].highlight_image">No Thumbnail</p>
         </b-carousel-slide>
       </b-carousel>
-      <p class="text-center">{{ places[index].burger_name }}</p>
+      <p class="text-center">{{ places[index2].burger_name }}</p>
       <button
         class="btn btn-primary btn-block"
-        @click="setClicked(images_approved_keys[index], index)"
+        @click="setClicked(images_approved_keys[index2], index2)"
       >Set</button>
       <br />
     </div>
@@ -119,6 +126,7 @@ export default {
   watch: {
     currentPage: async function(val) {
       let startIndex = (val - 1) * 12
+      this.showProcessing = true
       await this.resetAll()
       this.places = this.cachedPlaces.slice(startIndex, startIndex + 12)
       this.images_approved_keys = this.cachedImagesApprovedKeys.slice(
@@ -129,9 +137,11 @@ export default {
         startIndex,
         startIndex + 12
       )
+      this.showProcessing = false
     }
   },
   methods: {
+    onSlideEnd() {},
     resetToInitialState() {
       this.places = this.originalPlaces.slice(0, 12)
       this.images_approved_keys = this.originalApprovedImageKeys.slice(0, 12)
@@ -143,9 +153,11 @@ export default {
       this.currentPage = 1
       this.isFilterDisabled = false
     },
-    resetSearch() {
+    async resetSearch() {
       this.searchQuery = ''
-      this.resetToInitialState()
+      this.showProcessing = true
+      await this.resetToInitialState()
+      this.showProcessing = false
     },
     async getInitialsOfSearched() {
       this.image_keys = []
@@ -169,7 +181,7 @@ export default {
     },
     searchQueryEntered(e) {
       e.preventDefault()
-      this.filter = 'all'
+      //this.filter = 'all'
       this.isFilterDisabled = true
       this.resetAll()
       this.image_keys = []
@@ -212,9 +224,11 @@ export default {
       })
     },
     async filterChanged() {
+      this.showProcessing = true
       await this.resetAll()
       if (this.filter == 'all') {
         await this.resetToInitialState()
+        this.showProcessing = false
       } else {
         this.image_keys = []
         this.cachedPlaces = []
@@ -245,6 +259,7 @@ export default {
             this.image_keys = localImagesKeys
           }
         }
+        this.showProcessing = false
       }
     },
     hideAlert: function() {
@@ -255,14 +270,15 @@ export default {
       let url = null
       let i = 0
       for (i; i < this.images.length; i++) {
-        if (this.images[i]['key'] == imagekey) {
+        if (this.images[i]['key'] == imagekey && this.images[i].url) {
+          console.log(this.images[i].url)
           return this.images[i].url
         } else if (this.images.length - 1 == i) {
           return url
         }
       }
     },
-    setClicked: function(placeKey, index) {
+    setClicked: async function(placeKey, index) {
       this.showProcessing = true
       var selected = this.slides[index]
       this.images_approved_keys[index]
@@ -270,15 +286,17 @@ export default {
       var selectedImageKey = approved[selected]
       for (let i = 0; i < this.images.length; i++) {
         if (selectedImageKey == this.images[i].key) {
-          burgersRef
+          await burgersRef
             .child(placeKey)
             .update({ highlight_image: this.images[i] }, error => {
               if (error) {
-                this.showAlertForThumbnail(error)
+                alert(error)
               } else {
                 this.places[index].highlight_image = this.images[i]
-                this.showAlertForThumbnail()
               }
+            })
+            .finally(() => {
+              this.showProcessing = false
             })
           break
         }
@@ -304,6 +322,7 @@ export default {
       this.slides = []
     },
     async getInitialData() {
+      this.showProcessing = true
       let local_images_keys = []
       let local_images_approved = []
       let i = 0
@@ -339,6 +358,7 @@ export default {
                     this.originalApprovedImageKeys = this.cachedImagesApprovedKeys
                     this.originalImageKeys = local_images_keys
                     this.image_keys = local_images_keys
+                    this.showProcessing = false
                   }
                   i++
                 })

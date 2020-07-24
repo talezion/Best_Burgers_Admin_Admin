@@ -87,6 +87,7 @@ export default {
   },
   methods: {
     filterChanged: function() {
+      this.showProcessing = true
       let localPlaceKeys = []
       let localPlaces = []
       let i = 0
@@ -114,6 +115,9 @@ export default {
               i++
             })
           })
+          .finally(() => {
+            this.showProcessing = false
+          })
       } else if (this.filter == 'rejected') {
         burgersRef
           .orderByChild('was_reviewed')
@@ -139,6 +143,9 @@ export default {
               }
               i++
             })
+          })
+          .finally(() => {
+            this.showProcessing = false
           })
       } else if (this.filter == 'approved') {
         burgersRef
@@ -166,6 +173,9 @@ export default {
               i++
             })
           })
+          .finally(() => {
+            this.showProcessing = false
+          })
       }
     },
     hideAlert: function() {
@@ -178,10 +188,15 @@ export default {
         was_reviewed: true,
         is_validated: true
       }
-      burgersRef.child(place['key']).update(obj, error => {
-        this.showPlaceAlert(error, 'Approved successfully')
-        this.places.splice(index, 1)
-      })
+      burgersRef
+        .child(place['key'])
+        .update(obj, error => {
+          this.showPlaceAlert(error, 'Approved successfully')
+          this.places.splice(index, 1)
+        })
+        .finally(() => {
+          this.showProcessing = false
+        })
     },
     rejectClicked: function(place, index) {
       this.showProcessing = true
@@ -190,6 +205,9 @@ export default {
         .update({ was_reviewed: true, is_validated: false }, error => {
           this.showPlaceAlert(error, 'Rejected successfully')
           this.places.splice(index, 1)
+        })
+        .finally(() => {
+          this.showProcessing = false
         })
     },
     showPlaceAlert: function(error, message) {
