@@ -180,7 +180,6 @@ export default {
     },
     searchQueryEntered(e) {
       e.preventDefault()
-      //this.filter = 'all'
       this.isFilterDisabled = true
       this.resetAll()
       this.image_keys = []
@@ -256,6 +255,9 @@ export default {
           }
           if (this.originalPlaces.length - 1 == i) {
             this.image_keys = localImagesKeys
+            if (this.places.length < 8) {
+              this.images_approved = [...localImagesApproved]
+            }
           }
         }
         this.showProcessing = false
@@ -270,7 +272,6 @@ export default {
       let i = 0
       for (i; i < this.images.length; i++) {
         if (this.images[i]['key'] == imagekey && this.images[i].url) {
-          console.log(this.images[i].url)
           return this.images[i].url
         } else if (this.images.length - 1 == i) {
           return url
@@ -321,7 +322,7 @@ export default {
       this.slides = []
     },
     async getInitialData() {
-      this.showProcessing = true
+      //this.showProcessing = true
       let local_images_keys = []
       let local_images_approved = []
       let i = 0
@@ -330,38 +331,51 @@ export default {
           snapshot.forEach(childSnapshot => {
             var childKey = childSnapshot.key
             var childData = childSnapshot.val()
-            burgersRef
-              .orderByKey()
-              .equalTo(childKey)
-              .once('value', snapshot1 => {
-                snapshot1.forEach(childSnapshot1 => {
-                  var childKey1 = childSnapshot1.key
-                  var childData1 = childSnapshot1.val()
-                  childData1['key'] = childKey1
-                  this.cachedPlaces.push(childData1)
-                  this.cachedImagesApproved.push(childData)
-                  this.cachedImagesApprovedKeys.push(childKey)
-                  local_images_keys.push(childKey)
-                  if (local_images_approved.length < 8) {
-                    this.places.push(childData1)
-                    this.images_approved_keys.push(childKey)
-                    local_images_approved.push(childData)
-                    this.slides.push(0)
-                  }
-                  if (local_images_approved.length == 8) {
-                    this.images_approved = local_images_approved
-                  }
-                  if (snapshot.numChildren() - 1 == i) {
-                    this.originalPlaces = this.cachedPlaces
-                    this.originalApprovedImages = this.cachedImagesApproved
-                    this.originalApprovedImageKeys = this.cachedImagesApprovedKeys
-                    this.originalImageKeys = local_images_keys
-                    this.image_keys = local_images_keys
-                    this.showProcessing = false
-                  }
-                  i++
+            let isSlideSet = false
+            let list = {}
+            for (const [key, value] of Object.entries(childData)) {
+              if (value == 1 && key && key != 'undefined') {
+                list[key] = value
+                isSlideSet = true
+              }
+            }
+            if (isSlideSet) {
+              burgersRef
+                .orderByKey()
+                .equalTo(childKey)
+                .once('value', snapshot1 => {
+                  snapshot1.forEach(childSnapshot1 => {
+                    var childKey1 = childSnapshot1.key
+                    var childData1 = childSnapshot1.val()
+                    childData1['key'] = childKey1
+                    this.cachedPlaces.push(childData1)
+                    this.cachedImagesApproved.push(list)
+                    this.cachedImagesApprovedKeys.push(childKey)
+                    local_images_keys.push(childKey)
+                    if (local_images_approved.length < 8) {
+                      this.places.push(childData1)
+                      this.images_approved_keys.push(childKey)
+                      local_images_approved.push(list)
+                      this.slides.push(0)
+                    }
+                    if (local_images_approved.length == 8) {
+                      this.images_approved = local_images_approved
+                    }
+                    if (snapshot.numChildren() - 1 == i) {
+                      this.originalPlaces = this.cachedPlaces
+                      this.originalApprovedImages = this.cachedImagesApproved
+                      this.originalApprovedImageKeys = this.cachedImagesApprovedKeys
+                      this.originalImageKeys = local_images_keys
+                      this.image_keys = local_images_keys
+                      this.showProcessing = false
+                      if (this.places.length < 8) {
+                        this.images_approved = [...localImagesApproved]
+                      }
+                    }
+                    i++
+                  })
                 })
-              })
+            }
           })
         }
       })

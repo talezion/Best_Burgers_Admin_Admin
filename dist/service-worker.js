@@ -11,13 +11,13 @@
  * See https://goo.gl/2aRDsh
  */
 
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
+
 importScripts(
-  "https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js"
+  "/precache-manifest.47e9a070bcee7920858a35fe128fcdf0.js"
 );
 
-importScripts("/precache-manifest.5ad879de08d50593395936e90ecbf26f.js");
-
-workbox.core.setCacheNameDetails({ prefix: "best-burger-admin-panel" });
+workbox.core.setCacheNameDetails({prefix: "best-burger-admin-panel"});
 
 /**
  * The workboxSW.precacheAndRoute() method efficiently caches and responds to

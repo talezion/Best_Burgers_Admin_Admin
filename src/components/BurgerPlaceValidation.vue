@@ -86,7 +86,14 @@ export default {
     }
   },
   methods: {
+    resetData() {
+      this.places = []
+      this.cachedPlaces = []
+      this.originalPlaces = []
+      this.placeKeys = []
+    },
     filterChanged: function() {
+      this.resetData()
       this.showProcessing = true
       let localPlaceKeys = []
       let localPlaces = []
@@ -111,6 +118,9 @@ export default {
               }
               if (snapshot.numChildren() - 1 == i) {
                 this.placeKeys = localPlaceKeys
+                if (snapshot.numChildren() < 8) {
+                  this.places = [...localPlaces]
+                }
               }
               i++
             })
@@ -140,6 +150,9 @@ export default {
               }
               if (snapshot.numChildren() - 1 == i) {
                 this.placeKeys = localPlaceKeys
+                if (snapshot.numChildren() < 8) {
+                  this.places = [...localPlaces]
+                }
               }
               i++
             })
@@ -169,6 +182,9 @@ export default {
               }
               if (snapshot.numChildren() - 1 == i) {
                 this.placeKeys = localPlaceKeys
+                if (snapshot.numChildren() < 8) {
+                  this.places = [...localPlaces]
+                }
               }
               i++
             })
@@ -228,29 +244,6 @@ export default {
     let localPlaceKeys = []
     let localPlaces = []
     let i = 0
-    // burgersRef
-    //   .orderByChild('was_reviewed')
-    //   .equalTo(false)
-    //   .once('value', snapshot => {
-    //     snapshot.forEach(childSnapshot => {
-    //       var childKey = childSnapshot.key
-    //       var childData = childSnapshot.val()
-    //       childData['key'] = childKey
-    //       localPlaceKeys.push(childKey)
-    //       this.originalPlaces.push(childData)
-    //       this.cachedPlaces.push(childData)
-    //       if (localPlaces.length < 8) {
-    //         localPlaces.push(childData)
-    //       }
-    //       if (localPlaces.length == 8) {
-    //         this.places = [...localPlaces]
-    //       }
-    //       if (snapshot.numChildren() - 1 == i) {
-    //         this.placeKeys = localPlaceKeys
-    //       }
-    //       i++
-    //     })
-    //   })
     burgersRef
       .orderByChild('was_reviewed')
       .equalTo(false)
@@ -270,6 +263,9 @@ export default {
           }
           if (snapshot.numChildren() - 1 == i) {
             this.placeKeys = localPlaceKeys
+            if (snapshot.numChildren() < 8) {
+              this.places = [...localPlaces]
+            }
           }
           i++
         })
