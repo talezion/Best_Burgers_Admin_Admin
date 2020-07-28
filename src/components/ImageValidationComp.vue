@@ -43,7 +43,6 @@
       >
         <b-carousel-slide class="image" v-for="(images1, index1) in container_image" :key="index1">
           <v-lazy-image
-            v-if="getImageUrl(index1)"
             class="img img-responsive full-width"
             :src="getImageUrl(index1)"
             slot="img"
@@ -109,6 +108,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
+      this.showProcessing = true
       let startIndex = (val - 1) * 8
       this.resetAll()
       this.places = this.cachedPlaces.slice(startIndex, startIndex + 8)
@@ -120,6 +120,8 @@ export default {
         startIndex,
         startIndex + 8
       )
+      this.slides = [0, 0, 0, 0, 0, 0, 0, 0]
+      this.showProcessing = false
     }
   },
   methods: {
@@ -137,41 +139,52 @@ export default {
         let i = 0
         this.cachedImagesContainer = []
         this.cachedPlaces = []
+        this.slides = []
         this.cachedImagesContainerKeys = []
         await images_approved.orderByKey().once('value', snapshot => {
           if (snapshot.numChildren() > 0) {
             snapshot.forEach(childSnapshot => {
               var childKey = childSnapshot.key
               var childData = childSnapshot.val()
-              burgersRef
-                .orderByKey()
-                .equalTo(childKey)
-                .once('value', snapshot1 => {
-                  snapshot1.forEach(childSnapshot1 => {
-                    var childKey1 = childSnapshot1.key
-                    var childData1 = childSnapshot1.val()
-                    childData1['key'] = childKey1
-                    localImagesKeys.push(childKey)
-                    this.cachedPlaces.push(childData1)
-                    this.cachedImagesContainerKeys.push(childKey)
-                    this.cachedImagesContainer.push(childData)
-                    if (localImagesContainer.length < 8) {
-                      this.slides.push(0)
-                      this.images_container_keys.push(childKey)
-                      this.places.push(childData1)
-                      localImagesContainer.push(childData)
-                    }
-                    if (snapshot.numChildren() - 1 == i) {
-                      this.image_keys = localImagesKeys
-                      this.images_container = this.cachedImagesContainer.slice(
-                        0,
-                        8
-                      )
-                      this.showProcessing = false
-                    }
+              let isSlideSet = false
+              let list = {}
+              for (const [key, value] of Object.entries(childData)) {
+                if (value === 1 && key && key != 'undefined' && key != 0) {
+                  list[key] = value
+                  isSlideSet = true
+                }
+              }
+              if (isSlideSet) {
+                burgersRef
+                  .orderByKey()
+                  .equalTo(childKey)
+                  .once('value', snapshot1 => {
+                    snapshot1.forEach(childSnapshot1 => {
+                      var childKey1 = childSnapshot1.key
+                      var childData1 = childSnapshot1.val()
+                      childData1['key'] = childKey1
+                      localImagesKeys.push(childKey)
+                      this.cachedPlaces.push(childData1)
+                      this.cachedImagesContainerKeys.push(childKey)
+                      this.cachedImagesContainer.push(list)
+                      if (localImagesContainer.length < 8) {
+                        this.slides.push(0)
+                        this.images_container_keys.push(childKey)
+                        this.places.push(childData1)
+                        localImagesContainer.push(list)
+                      }
+                      if (snapshot.numChildren() - 1 == i) {
+                        this.image_keys = localImagesKeys
+                        this.images_container = this.cachedImagesContainer.slice(
+                          0,
+                          8
+                        )
+                        this.showProcessing = false
+                      }
+                    })
+                    i++
                   })
-                  i++
-                })
+              }
             })
           }
         })
@@ -184,41 +197,52 @@ export default {
         this.cachedImagesContainer = []
         this.cachedPlaces = []
         this.cachedImagesContainerKeys = []
+        this.slides = []
         let i = 0
         await images_rejected.orderByKey().once('value', snapshot => {
           if (snapshot.numChildren() > 0) {
             snapshot.forEach(childSnapshot => {
               var childKey = childSnapshot.key
               var childData = childSnapshot.val()
-              burgersRef
-                .orderByKey()
-                .equalTo(childKey)
-                .once('value', snapshot1 => {
-                  snapshot1.forEach(childSnapshot1 => {
-                    var childKey1 = childSnapshot1.key
-                    var childData1 = childSnapshot1.val()
-                    childData1['key'] = childKey1
-                    localImagesKeys.push(childKey)
-                    this.cachedPlaces.push(childData1)
-                    this.cachedImagesContainerKeys.push(childKey)
-                    this.cachedImagesContainer.push(childData)
-                    if (localImagesContainer.length < 8) {
-                      this.slides.push(0)
-                      this.images_container_keys.push(childKey)
-                      this.places.push(childData1)
-                      localImagesContainer.push(childData)
-                    }
-                    if (snapshot.numChildren() - 1 == i) {
-                      this.image_keys = localImagesKeys
-                      this.images_container = this.cachedImagesContainer.slice(
-                        0,
-                        8
-                      )
-                      this.showProcessing = false
-                    }
+              let isSlideSet = false
+              let list = {}
+              for (const [key, value] of Object.entries(childData)) {
+                if (value == 1 && key && key != 'undefined') {
+                  list[key] = value
+                  isSlideSet = true
+                }
+              }
+              if (isSlideSet) {
+                burgersRef
+                  .orderByKey()
+                  .equalTo(childKey)
+                  .once('value', snapshot1 => {
+                    snapshot1.forEach(childSnapshot1 => {
+                      var childKey1 = childSnapshot1.key
+                      var childData1 = childSnapshot1.val()
+                      childData1['key'] = childKey1
+                      localImagesKeys.push(childKey)
+                      this.cachedPlaces.push(childData1)
+                      this.cachedImagesContainerKeys.push(childKey)
+                      this.cachedImagesContainer.push(list)
+                      if (localImagesContainer.length < 8) {
+                        this.slides.push(0)
+                        this.images_container_keys.push(childKey)
+                        this.places.push(childData1)
+                        localImagesContainer.push(list)
+                      }
+                      if (snapshot.numChildren() - 1 == i) {
+                        this.image_keys = localImagesKeys
+                        this.images_container = this.cachedImagesContainer.slice(
+                          0,
+                          8
+                        )
+                        this.showProcessing = false
+                      }
+                    })
+                    i++
                   })
-                  i++
-                })
+              }
             })
           }
         })
@@ -401,35 +425,45 @@ export default {
           snapshot.forEach(childSnapshot => {
             var childKey = childSnapshot.key
             var childData = childSnapshot.val()
-            burgersRef
-              .orderByKey()
-              .equalTo(childKey)
-              .once('value', snapshot1 => {
-                snapshot1.forEach(childSnapshot1 => {
-                  var childKey1 = childSnapshot1.key
-                  var childData1 = childSnapshot1.val()
-                  childData1['key'] = childKey1
-                  localImagesKeys.push(childKey)
-                  this.cachedPlaces.push(childData1)
-                  this.cachedImagesContainerKeys.push(childKey)
-                  this.cachedImagesContainer.push(childData)
-                  if (localImagesContainer.length < 8) {
-                    this.slides.push(0)
-                    this.images_container_keys.push(childKey)
-                    this.places.push(childData1)
-                    localImagesContainer.push(childData)
-                  }
-                  if (snapshot.numChildren() - 1 == i) {
-                    this.image_keys = localImagesKeys
-                    this.images_container = this.cachedImagesContainer.slice(
-                      0,
-                      8
-                    )
-                    this.showProcessing = false
-                  }
+            let isSlideSet = false
+            let list = {}
+            for (const [key, value] of Object.entries(childData)) {
+              if (value == 1 && key && key != 'undefined') {
+                list[key] = value
+                isSlideSet = true
+              }
+            }
+            if (isSlideSet) {
+              burgersRef
+                .orderByKey()
+                .equalTo(childKey)
+                .once('value', snapshot1 => {
+                  snapshot1.forEach(childSnapshot1 => {
+                    var childKey1 = childSnapshot1.key
+                    var childData1 = childSnapshot1.val()
+                    childData1['key'] = childKey1
+                    localImagesKeys.push(childKey)
+                    this.cachedPlaces.push(childData1)
+                    this.cachedImagesContainerKeys.push(childKey)
+                    this.cachedImagesContainer.push(list)
+                    if (localImagesContainer.length < 8) {
+                      this.slides.push(0)
+                      this.images_container_keys.push(childKey)
+                      this.places.push(childData1)
+                      localImagesContainer.push(list)
+                    }
+                    if (snapshot.numChildren() - 1 == i) {
+                      this.image_keys = localImagesKeys
+                      this.images_container = this.cachedImagesContainer.slice(
+                        0,
+                        8
+                      )
+                      this.showProcessing = false
+                    }
+                  })
+                  i++
                 })
-                i++
-              })
+            }
           })
         }
       })

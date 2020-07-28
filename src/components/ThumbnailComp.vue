@@ -62,7 +62,6 @@
       >
         <b-carousel-slide class="image" v-for="(images1, index1) in approved_image" :key="index1">
           <v-lazy-image
-            v-if="getImageUrl(index1)"
             class="img img-responsive full-width"
             :src="getImageUrl(index1)"
             slot="img"
@@ -137,6 +136,7 @@ export default {
         startIndex,
         startIndex + 8
       )
+      this.slides = [0, 0, 0, 0, 0, 0, 0, 0]
       this.showProcessing = false
     }
   },
@@ -155,6 +155,7 @@ export default {
     async resetSearch() {
       this.searchQuery = ''
       this.showProcessing = true
+      this.slides = [0, 0, 0, 0, 0, 0, 0, 0]
       await this.resetToInitialState()
       this.showProcessing = false
     },
@@ -234,6 +235,7 @@ export default {
         this.cachedImagesApproved = []
         let localImagesApproved = []
         let localImagesKeys = []
+        this.slides = []
         let i = 0
         for (i = 0; i < this.originalPlaces.length; i++) {
           if (!this.originalPlaces[i].highlight_image) {
@@ -322,7 +324,7 @@ export default {
       this.slides = []
     },
     async getInitialData() {
-      //this.showProcessing = true
+      this.showProcessing = true
       let local_images_keys = []
       let local_images_approved = []
       let i = 0

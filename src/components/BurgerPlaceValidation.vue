@@ -1,6 +1,6 @@
 <template>
   <div class="row mt-3">
-    <div class="col-md-12 float-right mb-2">
+    <div class="col-md-12 col-lg-12 float-right mb-2">
       <b-pagination
         v-model="currentPage"
         :total-rows="placeKeys.length"
@@ -9,7 +9,7 @@
         class="float-right"
       ></b-pagination>
     </div>
-    <div class="col">
+    <div class="col-md-12 col-lg-12">
       <div class="form-group">
         <select
           v-model="filter"
@@ -29,27 +29,29 @@
       alertMessage
       }}
     </Alert>
-    <div class="row">
-      <div class="col-md-3 text-center mb-4" v-for="(place, index) in places" :key="index">
-        <div class="image">
-          <v-lazy-image
-            :src="place.highlight_image.url"
-            v-if="place.highlight_image"
-            class="img img-responsive full-width"
-          />
-          <v-lazy-image src="favicon.png" v-else class="img img-responsive full-width" />
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-3 text-center mb-4" v-for="(place, index) in places" :key="index">
+          <div class="image">
+            <v-lazy-image
+              :src="place.highlight_image.url"
+              v-if="place.highlight_image"
+              class="img img-responsive full-width"
+            />
+            <v-lazy-image src="favicon.png" v-else class="img img-responsive full-width" />
+          </div>
+          <p>{{ place.burger_name }}</p>
+          <div class="d-flex">
+            <button class="btn btn-primary flex-fill" @click="approveClicked(place, index)">Approve</button>
+            <button class="btn btn-danger flex-fill" @click="rejectClicked(place, index)">Reject</button>
+          </div>
+          <a
+            class="btn btn-success mt-2 btn-block"
+            :href="place.google_url"
+            target="_blank"
+            v-if="place.google_url"
+          >See on Maps</a>
         </div>
-        <p>{{ place.burger_name }}</p>
-        <div class="d-flex">
-          <button class="btn btn-primary flex-fill" @click="approveClicked(place, index)">Approve</button>
-          <button class="btn btn-danger flex-fill" @click="rejectClicked(place, index)">Reject</button>
-        </div>
-        <a
-          class="btn btn-success mt-2 btn-block"
-          :href="place.google_url"
-          target="_blank"
-          v-if="place.google_url"
-        >See on Maps</a>
       </div>
     </div>
   </div>
