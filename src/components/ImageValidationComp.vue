@@ -330,7 +330,6 @@ export default {
       const selected = this.slides[index]
       const container = Object.keys(this.images_container[index])
       const selectedImageKey = container[selected]
-      console.log(placeKey, index)
       await images_rejected
         .orderByKey()
         .equalTo(placeKey)
@@ -362,7 +361,6 @@ export default {
             })
           }
         })
-      console.log(placeKey)
       await images_container
         .child(placeKey)
         .child(selectedImageKey)
