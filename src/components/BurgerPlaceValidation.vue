@@ -106,8 +106,8 @@ export default {
           .equalTo(false)
           .once('value', snapshot => {
             snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              var childData = childSnapshot.val()
+              const childKey = childSnapshot.key
+              const childData = childSnapshot.val()
               childData['key'] = childKey
               localPlaceKeys.push(childKey)
               this.originalPlaces.push(childData)
@@ -136,8 +136,8 @@ export default {
           .equalTo(true)
           .once('value', snapshot => {
             snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              var childData = childSnapshot.val()
+              const childKey = childSnapshot.key
+              const childData = childSnapshot.val()
               childData['key'] = childKey
               if (!childData.is_validated) {
                 localPlaceKeys.push(childKey)
@@ -168,8 +168,8 @@ export default {
           .equalTo(true)
           .once('value', snapshot => {
             snapshot.forEach(childSnapshot => {
-              var childKey = childSnapshot.key
-              var childData = childSnapshot.val()
+              const childKey = childSnapshot.key
+              const childData = childSnapshot.val()
               childData['key'] = childKey
               if (childData.is_validated) {
                 localPlaceKeys.push(childKey)
@@ -251,8 +251,8 @@ export default {
       .equalTo(false)
       .once('value', snapshot => {
         snapshot.forEach(childSnapshot => {
-          var childKey = childSnapshot.key
-          var childData = childSnapshot.val()
+          const childKey = childSnapshot.key
+          const childData = childSnapshot.val()
           childData['key'] = childKey
           localPlaceKeys.push(childKey)
           this.originalPlaces.push(childData)

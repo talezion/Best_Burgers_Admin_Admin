@@ -163,8 +163,8 @@ export default {
       this.image_keys = []
       await images_approved.orderByKey().once('value', snapshot => {
         snapshot.forEach(childSnapshot => {
-          var childKey = childSnapshot.key
-          var childData = childSnapshot.val()
+          const childKey = childSnapshot.key
+          const childData = childSnapshot.val()
           burgersRef
             .orderByKey()
             .equalTo(childKey)
@@ -282,10 +282,10 @@ export default {
     },
     setClicked: async function(placeKey, index) {
       this.showProcessing = true
-      var selected = this.slides[index]
+      const selected = this.slides[index]
       this.images_approved_keys[index]
-      var approved = Object.keys(this.images_approved[index])
-      var selectedImageKey = approved[selected]
+      const approved = Object.keys(this.images_approved[index])
+      const selectedImageKey = approved[selected]
       for (let i = 0; i < this.images.length; i++) {
         if (selectedImageKey == this.images[i].key) {
           await burgersRef
@@ -328,11 +328,12 @@ export default {
       let local_images_keys = []
       let local_images_approved = []
       let i = 0
+      let j = 0
       await images_approved.orderByKey().once('value', snapshot => {
         if (snapshot.numChildren() > 0) {
           snapshot.forEach(childSnapshot => {
-            var childKey = childSnapshot.key
-            var childData = childSnapshot.val()
+            const childKey = childSnapshot.key
+            const childData = childSnapshot.val()
             let isSlideSet = false
             let list = {}
             for (const [key, value] of Object.entries(childData)) {
@@ -342,13 +343,14 @@ export default {
               }
             }
             if (isSlideSet) {
+              j++
               burgersRef
                 .orderByKey()
                 .equalTo(childKey)
                 .once('value', snapshot1 => {
                   snapshot1.forEach(childSnapshot1 => {
-                    var childKey1 = childSnapshot1.key
-                    var childData1 = childSnapshot1.val()
+                    const childKey1 = childSnapshot1.key
+                    const childData1 = childSnapshot1.val()
                     childData1['key'] = childKey1
                     this.cachedPlaces.push(childData1)
                     this.cachedImagesApproved.push(list)
@@ -363,7 +365,7 @@ export default {
                     if (local_images_approved.length == 8) {
                       this.images_approved = local_images_approved
                     }
-                    if (snapshot.numChildren() - 1 == i) {
+                    if (snapshot.numChildren() - 1 == i || i + 1 == j) {
                       this.originalPlaces = this.cachedPlaces
                       this.originalApprovedImages = this.cachedImagesApproved
                       this.originalApprovedImageKeys = this.cachedImagesApprovedKeys
@@ -374,8 +376,8 @@ export default {
                         this.images_approved = [...localImagesApproved]
                       }
                     }
-                    i++
                   })
+                  i++
                 })
             }
           })

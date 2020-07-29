@@ -43,8 +43,8 @@ export default {
   mounted() {
     images.orderByKey().once('value', snapshot => {
       snapshot.forEach(childSnapshot => {
-        var childKey = childSnapshot.key
-        var childData = childSnapshot.val()
+        const childKey = childSnapshot.key
+        const childData = childSnapshot.val()
         childData['key'] = childKey
         this.images.push(childData)
       })
